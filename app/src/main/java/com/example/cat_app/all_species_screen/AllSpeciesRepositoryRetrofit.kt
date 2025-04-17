@@ -21,6 +21,9 @@ class AllSpeciesRepositoryRetrofit @Inject constructor(
             Breed(
                 id = dto.id,
                 name = dto.name,
+                temperament = dto.temperament,
+                origin = dto.origin,
+                description = dto.description,
                 imageUrl = dto.image?.url
             )
         }

@@ -36,10 +36,10 @@ class AllSpeciesViewModel @Inject constructor(
     }
 
     init {
-        Log.d("AllSpeciesVM", "init: ViewModel constructed")
-        setEvent(UiEvent.LoadBreeds)
-        Log.d("AllSpeciesVM", "init: LoadBreeds event enqueued")
+        Log.d("AllSpeciesVM", "init: line before observeEvents()")
         observeEvents()
+        Log.d("AllSpeciesVM", "init: line before setEvent()")
+        setEvent(UiEvent.LoadBreeds)
     }
 
 //    private fun observeEvents() {
@@ -60,7 +60,7 @@ class AllSpeciesViewModel @Inject constructor(
         events.collect { event ->
             Log.d(TAG, "observeEvents: got event = $event")
             when (event) {
-                UiEvent.LoadBreeds           -> loadBreeds()
+                UiEvent.LoadBreeds -> loadBreeds()
                 is UiEvent.SearchQueryChanged -> applySearch(event.query)
             }
         }
@@ -68,34 +68,41 @@ class AllSpeciesViewModel @Inject constructor(
 
     // pre smo imali hardkodovano, sad API
     private fun loadBreeds() = viewModelScope.launch {
-        Log.d("AllSpeciesVM", "loadBreeds() start")
-        val list = allSpeciesRepository.getAllSpecies()
-        Log.d("AllSpeciesVM", "got ${list.size} breeds from repo")
-        setState { copy(/* … */) }
-
-
-        setState {
-            copy(loading = true, error = null)
-        }
+        Log.d(TAG, "loadBreeds() start")
+        setState { copy(loading = true, error = null) }
         try {
             val list = allSpeciesRepository.getAllSpecies()
+            Log.d(TAG, "loadBreeds: repo returned ${list.size} items")
+
+            // Ako hoćeš da pri samom load‑u primeniš postojeći query (npr. ako user
+            // već nešto ukucao pre nego što je lista stigla), možeš:
+            val currentQuery = _state.value.searchQuery
+            val initialFiltered = if (currentQuery.isBlank()) {
+                list
+            } else {
+                list.filter { it.name.contains(currentQuery, ignoreCase = true) }
+            }
+
             setState {
                 copy(
                     loading = false,
                     allBreeds = list,
-                    filteredBreeds = list
+                    filteredBreeds = initialFiltered
                 )
             }
         } catch (t: Throwable) {
+            Log.e(TAG, "loadBreeds: error fetching breeds", t)
             setState { copy(loading = false, error = t) }
         }
     }
 
     private fun applySearch(query: String) = viewModelScope.launch {
         setState {
+            // ovde izračunam novi filtered list na osnovu query‑ja
+            val filtered = allBreeds.filter { it.name.contains(query, ignoreCase = true) }
             copy(
                 searchQuery = query,
-                filteredBreeds = allBreeds.filter { it.name.contains(query, ignoreCase = true) }
+                filteredBreeds = filtered
             )
         }
     }
