@@ -4,5 +4,5 @@ import retrofit2.http.GET
 
 interface AllSpeciesAPI {
     @GET("breeds")
-    suspend fun getBreeds(): List<BreedDTO>
+    suspend fun getAllBreeds(): List<BreedDTO>
 }

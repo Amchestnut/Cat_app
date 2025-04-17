@@ -1,4 +1,4 @@
-package com.example.cat_app.data_for_cats
+package com.example.cat_app.domain
 
 data class Breed(
     val id: String,

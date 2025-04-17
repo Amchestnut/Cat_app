@@ -1,5 +1,7 @@
 package com.example.cat_app.all_species_screen
 
+import com.example.cat_app.domain.Breed
+
 interface AllSpeciesScreenContract {
 
     // 1) Stanje ekrana: sta i kako se renderuje

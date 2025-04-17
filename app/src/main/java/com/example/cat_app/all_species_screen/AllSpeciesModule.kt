@@ -1,5 +1,6 @@
 package com.example.cat_app.all_species_screen
 
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -11,9 +12,10 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)       // definiše u koji scope/komponentu modul ide (SingletonComponent za ceo app, ViewModelComponent za VM, itd.).
 object AllSpeciesModule {
 
-    @Provides                               // konkretna metoda koja vraca instancu nekog tipa (AllSpeciesRepository)
+//    @Provides                               // konkretna metoda koja vraca instancu nekog tipa (AllSpeciesRepository)
+    @Provides
     @Singleton                              // jednom stvori ovaj objekat, i deli ga svuda (u okviru singleton component)
-    fun provideAllSpeciesRepository(impl: AllSpeciesRepositoryInMemory): AllSpeciesRepository = impl
+    fun provideAllSpeciesRepository(impl: AllSpeciesRepositoryRetrofit): AllSpeciesRepository = impl
 }
 
 

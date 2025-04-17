@@ -27,6 +27,12 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(): OkHttpClient =
         OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                val req = chain.request().newBuilder()
+                    .addHeader("x-api-key", "live_Nj3uX1486zgD91CnsN7B9banbDlAusGRexPFxVInL3FAY0HX8bKkknfT2q6i28B7")
+                    .build()
+                chain.proceed(req)
+            }
             .addInterceptor(HttpLoggingInterceptor().apply { level =
                 HttpLoggingInterceptor.Level.BODY   // importovao sam BODY,
             })

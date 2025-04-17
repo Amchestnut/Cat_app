@@ -1,13 +1,16 @@
 package com.example.cat_app.all_species_screen
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cat_app.TAG
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import com.example.cat_app.all_species_screen.AllSpeciesScreenContract.UiState
 import com.example.cat_app.all_species_screen.AllSpeciesScreenContract.UiEvent
+import com.example.cat_app.domain.Breed
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
@@ -33,37 +36,58 @@ class AllSpeciesViewModel @Inject constructor(
     }
 
     init {
+        Log.d("AllSpeciesVM", "init: ViewModel constructed")
         setEvent(UiEvent.LoadBreeds)
+        Log.d("AllSpeciesVM", "init: LoadBreeds event enqueued")
         observeEvents()
     }
 
-    private fun observeEvents() {
-        viewModelScope.launch {
-            events.collect { event ->
-                when (event) {
-                    is UiEvent.LoadBreeds -> loadBreeds()
-                    is UiEvent.SearchQueryChanged -> applySearch(event.query)
-                }
+//    private fun observeEvents() {
+//        Log.d(TAG, "observeEvents: collecting events")
+//        viewModelScope.launch {
+//
+//            events.collect { event ->
+//                when (event) {
+//                    is UiEvent.LoadBreeds -> loadBreeds()
+//                    is UiEvent.SearchQueryChanged -> applySearch(event.query)
+//                }
+//            }
+//        }
+//    }
+
+    private fun observeEvents() = viewModelScope.launch {
+        Log.d(TAG, "observeEvents: collecting events")
+        events.collect { event ->
+            Log.d(TAG, "observeEvents: got event = $event")
+            when (event) {
+                UiEvent.LoadBreeds           -> loadBreeds()
+                is UiEvent.SearchQueryChanged -> applySearch(event.query)
             }
         }
     }
 
+    // pre smo imali hardkodovano, sad API
     private fun loadBreeds() = viewModelScope.launch {
-        // Ovo je mesto gde bi zvao API; za sada hardkod:
-        val hardcoded = listOf(
-            Breed(1, "Abyssinian"),
-            Breed(2, "Bengal"),
-            Breed(3, "Maine Coon"),
-            Breed(4, "Persian"),
-            Breed(5, "Siamese"),
-            Breed(6, "Sphynx")
-        )
+        Log.d("AllSpeciesVM", "loadBreeds() start")
+        val list = allSpeciesRepository.getAllSpecies()
+        Log.d("AllSpeciesVM", "got ${list.size} breeds from repo")
+        setState { copy(/* … */) }
+
+
         setState {
-            copy(
-                loading = false,
-                allBreeds = hardcoded,
-                filteredBreeds = hardcoded
-            )
+            copy(loading = true, error = null)
+        }
+        try {
+            val list = allSpeciesRepository.getAllSpecies()
+            setState {
+                copy(
+                    loading = false,
+                    allBreeds = list,
+                    filteredBreeds = list
+                )
+            }
+        } catch (t: Throwable) {
+            setState { copy(loading = false, error = t) }
         }
     }
 
