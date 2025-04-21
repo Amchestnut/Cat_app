@@ -24,7 +24,25 @@ class AllSpeciesRepositoryRetrofit @Inject constructor(
                 temperament = dto.temperament,
                 origin = dto.origin,
                 description = dto.description,
-                imageUrl = dto.image?.url
+                imageUrl = dto.image?.url,
+
+//                lifeSpan         = dto.life_span,
+//                weightMetric     = dto.weightMetric,
+
+//                adaptability     = dto.adaptability,
+//                affectionLevel   = dto.affectionLevel,
+//                childFriendly    = dto.childFriendly,
+//                dogFriendly      = dto.dogFriendly,
+//                energyLevel      = dto.energyLevel,
+//                grooming         = dto.grooming,
+//                healthIssues     = dto.healthIssues,
+//                intelligence     = dto.intelligence,
+//                sheddingLevel    = dto.sheddingLevel,
+//                socialNeeds      = dto.socialNeeds,
+//                strangerFriendly = dto.strangerFriendly,
+//                vocalisation     = dto.vocalisation,
+//                rare             = dto.rare == 1,
+//                wikipediaUrl     = dto.wikipediaUrl
             )
         }
     }

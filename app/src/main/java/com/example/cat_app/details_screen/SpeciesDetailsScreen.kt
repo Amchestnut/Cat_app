@@ -1,5 +1,7 @@
 package com.example.cat_app.details_screen
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import androidx.compose.material3.CardElevation
+import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -115,6 +118,19 @@ fun SpeciesDetailsScreen(
                     )
                 }
 
+                Spacer(Modifier.height(8.dp))
+
+                //  ─────── Basics ───────
+//                Column(Modifier.padding(horizontal = 16.dp)) {
+//                    Text(breed!!.name, style = MaterialTheme.typography.headlineMedium)
+//                    breed.lifeSpan?.let {
+//                        Text("Life span: $it years", style = MaterialTheme.typography.bodyMedium)
+//                    }
+//                    breed.weightMetric?.let {
+//                        Text("Avg weight: $it kg", style = MaterialTheme.typography.bodyMedium)
+//                    }
+//                }
+
                 Spacer(Modifier.height(16.dp))
 
                 // Details Card
@@ -128,7 +144,7 @@ fun SpeciesDetailsScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         breed?.origin?.let {
                             Text(
-                                text = "Origin:",
+                                text = "Origin country:",
                                 style = MaterialTheme.typography.labelLarge
                             )
                             Text(text = it, style = MaterialTheme.typography.bodyMedium)
@@ -158,6 +174,61 @@ fun SpeciesDetailsScreen(
                             )
                         }
                     }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                //  ─────── Five behavior/needs widgets ───────
+//                Column(Modifier.padding(horizontal = 16.dp)) {
+//                    listOf(
+//                        "Adaptability"    to breed!!.adaptability,
+//                        "Energy level"    to breed.energyLevel,
+//                        "Affection"       to breed.affectionLevel,
+//                        "Intelligence"    to breed.intelligence,
+//                        "Social needs"    to breed.socialNeeds
+//                    ).forEach { (label, value) ->
+//                        Text(label, style = MaterialTheme.typography.bodySmall)
+//                        LinearProgressIndicator(
+//                            progress = value / 5f,
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .height(8.dp)
+//                                .clip(RoundedCornerShape(4.dp))
+//                        )
+//                        Spacer(Modifier.height(12.dp))
+//                    }
+//                }
+
+                Spacer(Modifier.height(16.dp))
+
+                //  ─────── Rarity badge + Wikipedia link ───────
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+//                    if (breed!!.rare) {
+//                        ChipColors(
+//                            onClick = { /* maybe show “why rare?” */ },
+//                            colors  = ChipDefaults.chipColors(containerColor = Color(0xFFE57373))
+//                        ) {
+//                            Text("Rare breed", color = Color.White)
+//                        }
+//                    }
+
+                    Spacer(Modifier.weight(1f))
+
+//                    val ctx = LocalContext.current
+//                    TextButton(onClick = {
+//                        breed!!.wikipediaUrl?.let { url ->
+//                            ctx.startActivity(
+//                                Intent(Intent.ACTION_VIEW, Uri.parse(url))
+//                            )
+//                        }
+//                    }) {
+//                        Text("Learn on Wikipedia")
+//                    }
                 }
 
                 Spacer(Modifier.height(24.dp))
