@@ -19,17 +19,19 @@ class AllSpeciesRepositoryRetrofit @Inject constructor(
         // 2) Mapiraj ih u domain model
         return dtoList.map { dto ->
             Breed(
-                id = dto.id,
-                name = dto.name,
-                temperament = dto.temperament,
-                origin = dto.origin,
-                description = dto.description,
-                imageUrl = dto.image?.url,
+                id               = dto.id,
+                name             = dto.name,
+                temperament      = dto.temperament,
+                origin           = dto.origin,
+                description      = dto.description,
+                imageUrl         = dto.image?.url,
 
-//                lifeSpan         = dto.life_span,
-//                weightMetric     = dto.weightMetric,
+                lifeSpan         = dto.lifeSpan,
+                weightMetric     = dto.weight?.metric,
+                weightImperial   = dto.weight?.imperial,
+                height           = dto.height,
 
-                altNames = dto.altNames,
+                altNames         = dto.altNames,
                 adaptability     = dto.adaptability,
                 affectionLevel   = dto.affectionLevel,
                 childFriendly    = dto.childFriendly,

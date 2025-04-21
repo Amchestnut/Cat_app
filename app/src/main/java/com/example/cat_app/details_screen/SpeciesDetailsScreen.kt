@@ -15,6 +15,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -130,19 +133,24 @@ fun SpeciesDetailsScreen(
 
                 Spacer(Modifier.height(8.dp))
 
-                //  ─────── Basics ───────
-//                Column(Modifier.padding(horizontal = 16.dp)) {
-//                    Text(breed!!.name, style = MaterialTheme.typography.headlineMedium)
-//                    breed.lifeSpan?.let {
-//                        Text("Life span: $it years", style = MaterialTheme.typography.bodyMedium)
-//                    }
-//                    breed.weightMetric?.let {
-//                        Text("Avg weight: $it kg", style = MaterialTheme.typography.bodyMedium)
-//                    }
-//                }
-
+                LifeSpanBar(
+                    lifeSpan = breed!!.lifeSpan,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
 
                 Spacer(Modifier.height(16.dp))
+
+                SizeCard(
+                    weightMetric   = breed.weightMetric,
+                    weightImperial = breed.weightImperial,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                )
+
+                Spacer(Modifier.height(24.dp))
 
                 // Details Card
                 Card(
@@ -188,12 +196,12 @@ fun SpeciesDetailsScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                //  ─────── Five behavior/needs widgets ───────
-                BreedStats(breed!!)
+                // Five behavior/needs widgets
+                BreedStats(breed)
 
                 Spacer(Modifier.height(16.dp))
 
-                //  ─────── Rarity badge + Wikipedia link ───────
+                // Rarity + Wikipedia link
                 Row(
                     Modifier
                         .fillMaxWidth()
@@ -315,3 +323,101 @@ fun StatCard(label: String, value: Int, modifier: Modifier = Modifier) {
         }
     }
 }
+
+
+@Composable
+fun LifeSpanBar(
+    lifeSpan: String?,
+    modifier: Modifier = Modifier,
+    speciesMax: Int = 20               // longest cat life that we want to display (max 20 yrs)
+) {
+    if (lifeSpan.isNullOrBlank()) return
+
+    // ─── parse "12 - 15" → 12..15 ───────────────────────────────────────────────
+    val (min, max) = lifeSpan
+        .split("-")
+        .map { it.trim().toIntOrNull() ?: 0 }
+        .let { it.first() to it.last() }
+
+    val average = (min + max) / 2f
+    val progress = average / speciesMax
+
+    Column(modifier) {
+        Text("Typical life‑span", style = MaterialTheme.typography.labelLarge)
+
+        Spacer(Modifier.height(6.dp))
+
+        // nice animated colour‑blend progress bar
+        val animated by animateFloatAsState(progress)
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .height(14.dp)
+                .clip(RoundedCornerShape(7.dp))
+                .background(Color.LightGray.copy(alpha = .3f))
+        ) {
+            Box(
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(animated)
+                    .background(
+                        Brush.horizontalGradient(
+                            listOf(Color(0xFF4CAF50), Color(0xFFFFEB3B), Color(0xFFF44336))
+                        )
+                    )
+            )
+        }
+
+        Text(
+            text = "$min‑$max years",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+    }
+}
+
+
+@Composable
+fun SizeCard(
+    weightMetric: String?,
+    weightImperial: String?,
+    modifier: Modifier = Modifier
+) {
+    if (weightMetric == null && weightImperial == null) return
+
+    var metric by remember { mutableStateOf(true) }
+
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(
+                    start = 12.dp,  // ← push everything in from the left
+                    top = 8.dp,
+                    end = 12.dp,
+                    bottom = 8.dp
+                )
+        ) {
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Weight", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.weight(1f))
+                Switch(
+                    checked = metric,
+                    onCheckedChange = { metric = it }
+                )
+            }
+
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                text = if (metric) "${weightMetric ?: "?"} kg" else "${weightImperial ?: "?"} lb",
+                style = MaterialTheme.typography.titleSmall
+            )
+        }
+    }
+}
+
+

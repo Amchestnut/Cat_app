@@ -9,8 +9,10 @@ data class Breed(
     val imageUrl: String?,
 
     // added new
-//    val lifeSpan: String?,             // e.g. "12 - 15"
-//    val weightMetric: String?,         // e.g. "3 - 7"
+    val lifeSpan: String?,             // e.g. "12 - 15"
+    val weightMetric: String?,         // e.g. "3 - 7"
+    val weightImperial: String?,
+    val height: String?,
 
     val altNames : String?,
 

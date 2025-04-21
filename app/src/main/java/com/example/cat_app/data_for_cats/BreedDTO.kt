@@ -12,9 +12,14 @@ data class BreedDTO(
     val description: String? = null,
     val image: ImageDTO? = null,
 
-    // new
-//    val life_span: String?,             // e.g. "12 - 15"
-//    val weightMetric: String?,         // e.g. "3 - 7"
+
+    // Detailed information
+    @SerialName("life_span")
+    val lifeSpan: String? = null,
+
+    val weight: WeightDTO? = null,
+
+    val height: String? = null,
 
     @SerialName("alt_names")
     val altNames: String? = null,
@@ -51,7 +56,7 @@ data class BreedDTO(
 
     val vocalisation: Int,
 
-    val rare: Int,                 // from DTO “rare” field
+    val rare: Int,                 // from DTO “rare” field, 1 or 0
 
     @SerialName("wikipedia_url")
     val wikipediaUrl: String? = null          // to open in browser
