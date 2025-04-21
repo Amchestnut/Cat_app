@@ -13,13 +13,15 @@ data class Breed(
 //    val weightMetric: String?,         // e.g. "3 - 7"
 
     val altNames : String?,
+
+    // 6 traits for a scale 1 to 5
     val adaptability: Int,
     val affectionLevel: Int,
     val childFriendly: Int,
     val dogFriendly: Int,
     val energyLevel: Int,
-
     val grooming: Int,
+
     val healthIssues: Int,
     val intelligence: Int,
     val sheddingLevel: Int,

@@ -2,6 +2,7 @@ package com.example.cat_app.details_screen
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -13,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,10 +22,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.cat_app.domain.Breed
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,7 +76,8 @@ fun SpeciesDetailsScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (breed == null && state.error != null) {
+        }
+        else if (breed == null && state.error != null) {
             Box(
                 Modifier
                     .fillMaxSize()
@@ -81,14 +86,14 @@ fun SpeciesDetailsScreen(
             ) {
                 Text("Error: ${state.error.message}")
             }
-        } else {
+        }
+        else {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(paddingValues)
             ) {
-                // Image with overlay
                 Box(
                     Modifier
                         .fillMaxWidth()
@@ -142,7 +147,6 @@ fun SpeciesDetailsScreen(
                 // Details Card
                 Card(
                     shape = RoundedCornerShape(12.dp),
-//                    elevation = CardElevation(4),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
@@ -185,25 +189,7 @@ fun SpeciesDetailsScreen(
                 Spacer(Modifier.height(16.dp))
 
                 //  ─────── Five behavior/needs widgets ───────
-                Column(Modifier.padding(horizontal = 16.dp)) {
-                    listOf(
-                        "Adaptability"    to breed!!.adaptability,
-                        "Energy level"    to breed.energyLevel,
-                        "Affection"       to breed.affectionLevel,
-                        "Intelligence"    to breed.intelligence,
-                        "Social needs"    to breed.socialNeeds
-                    ).forEach { (label, value) ->
-                        Text(label, style = MaterialTheme.typography.bodySmall)
-                        LinearProgressIndicator(
-                            progress = value / 5f,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(8.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                        )
-                        Spacer(Modifier.height(12.dp))
-                    }
-                }
+                BreedStats(breed!!)
 
                 Spacer(Modifier.height(16.dp))
 
@@ -253,11 +239,79 @@ fun SpeciesDetailsScreen(
                     }
                 }
 
-
-
                 Spacer(Modifier.height(24.dp))
             }
         }
     }
 }
 
+
+@Composable
+fun BreedStats(breed: Breed) {
+    Column(Modifier.padding(16.dp)) {
+        Text(
+            text = "Behavioral Profile",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(Modifier.height(12.dp))
+
+        // Row 1: 3 stats
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatCard("Adaptability",    breed.adaptability,    Modifier.weight(1f))
+            StatCard("Energy",         breed.energyLevel,     Modifier.weight(1f))
+            StatCard("Affection",      breed.affectionLevel,  Modifier.weight(1f))
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Row 2: 3 stats
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            StatCard("Intelligence",   breed.intelligence,    Modifier.weight(1f))
+            StatCard("Social Needs",   breed.socialNeeds,     Modifier.weight(1f))
+            StatCard("Grooming",      breed.grooming,  Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+fun StatCard(label: String, value: Int, modifier: Modifier = Modifier) {
+    // animate from 0 to value 5 on first composition
+    val progress by animateFloatAsState(targetValue = value / 5f)
+
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            Modifier
+                .padding(12.dp)
+                .wrapContentHeight(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(
+                    progress = progress,
+                    modifier = Modifier.size(56.dp),
+                    strokeWidth = 6.dp
+                )
+                Text(
+                    text = "${(progress * 100).toInt()}%",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
