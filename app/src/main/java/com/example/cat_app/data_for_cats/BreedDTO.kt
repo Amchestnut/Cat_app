@@ -1,5 +1,6 @@
 package com.example.cat_app.data_for_cats
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -15,19 +16,43 @@ data class BreedDTO(
 //    val life_span: String?,             // e.g. "12 - 15"
 //    val weightMetric: String?,         // e.g. "3 - 7"
 
-//    val adaptability: Int,
-//    val affectionLevel: Int,
-//    val childFriendly: Int,
-//    val dogFriendly: Int,
-//    val energyLevel: Int,
-//    val grooming: Int,
-//    val healthIssues: Int,
-//    val intelligence: Int,
-//    val sheddingLevel: Int,
-//    val socialNeeds: Int,
-//    val strangerFriendly: Int,
-//    val vocalisation: Int,
-//    val rare: Int,                 // from DTO “rare” field
-//    val wikipediaUrl: String?          // to open in browser
-) {
-}
+    @SerialName("alt_names")
+    val altNames: String? = null,
+
+    val adaptability: Int,
+
+    @SerialName("affection_level")      // without this, kotlin will look for JSON key called "AffectionLevel" but there is only "affection_level", so i need to use this.
+    val affectionLevel: Int,
+
+    @SerialName("child_friendly")
+    val childFriendly: Int,
+
+    @SerialName("dog_friendly")
+    val dogFriendly: Int,
+
+    @SerialName("energy_level")
+    val energyLevel: Int,
+
+    val grooming: Int,
+
+    @SerialName("health_issues")
+    val healthIssues: Int,
+
+    val intelligence: Int,
+
+    @SerialName("shedding_level")
+    val sheddingLevel: Int,
+
+    @SerialName("social_needs")
+    val socialNeeds: Int,
+
+    @SerialName("stranger_friendly")
+    val strangerFriendly: Int,
+
+    val vocalisation: Int,
+
+    val rare: Int,                 // from DTO “rare” field
+
+    @SerialName("wikipedia_url")
+    val wikipediaUrl: String? = null          // to open in browser
+)

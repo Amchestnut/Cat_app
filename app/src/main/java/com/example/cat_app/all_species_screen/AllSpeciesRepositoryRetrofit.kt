@@ -29,20 +29,22 @@ class AllSpeciesRepositoryRetrofit @Inject constructor(
 //                lifeSpan         = dto.life_span,
 //                weightMetric     = dto.weightMetric,
 
-//                adaptability     = dto.adaptability,
-//                affectionLevel   = dto.affectionLevel,
-//                childFriendly    = dto.childFriendly,
-//                dogFriendly      = dto.dogFriendly,
-//                energyLevel      = dto.energyLevel,
-//                grooming         = dto.grooming,
-//                healthIssues     = dto.healthIssues,
-//                intelligence     = dto.intelligence,
-//                sheddingLevel    = dto.sheddingLevel,
-//                socialNeeds      = dto.socialNeeds,
-//                strangerFriendly = dto.strangerFriendly,
-//                vocalisation     = dto.vocalisation,
-//                rare             = dto.rare == 1,
-//                wikipediaUrl     = dto.wikipediaUrl
+                altNames = dto.altNames,
+                adaptability     = dto.adaptability,
+                affectionLevel   = dto.affectionLevel,
+                childFriendly    = dto.childFriendly,
+                dogFriendly      = dto.dogFriendly,
+                energyLevel      = dto.energyLevel,
+
+                grooming         = dto.grooming,
+                healthIssues     = dto.healthIssues,
+                intelligence     = dto.intelligence,
+                sheddingLevel    = dto.sheddingLevel,
+                socialNeeds      = dto.socialNeeds,
+                strangerFriendly = dto.strangerFriendly,
+                vocalisation     = dto.vocalisation,
+                rare             = dto.rare == 1,
+                wikipediaUrl     = dto.wikipediaUrl
             )
         }
     }

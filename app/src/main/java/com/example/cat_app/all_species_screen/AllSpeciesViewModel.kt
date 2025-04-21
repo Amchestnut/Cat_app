@@ -42,19 +42,6 @@ class AllSpeciesViewModel @Inject constructor(
         setEvent(UiEvent.LoadBreeds)
     }
 
-//    private fun observeEvents() {
-//        Log.d(TAG, "observeEvents: collecting events")
-//        viewModelScope.launch {
-//
-//            events.collect { event ->
-//                when (event) {
-//                    is UiEvent.LoadBreeds -> loadBreeds()
-//                    is UiEvent.SearchQueryChanged -> applySearch(event.query)
-//                }
-//            }
-//        }
-//    }
-
     private fun observeEvents() = viewModelScope.launch {
         Log.d(TAG, "observeEvents: collecting events")
         events.collect { event ->
@@ -74,8 +61,7 @@ class AllSpeciesViewModel @Inject constructor(
             val list = allSpeciesRepository.getAllSpecies()
             Log.d(TAG, "loadBreeds: repo returned ${list.size} items")
 
-            // Ako hoćeš da pri samom load‑u primeniš postojeći query (npr. ako user
-            // već nešto ukucao pre nego što je lista stigla), možeš:
+            // Ako hocu da tokom LOAD-a primenim postojeci query (tj user je vec nesto ukucao pre nego sto je lista stigla), uradicu ovo:
             val currentQuery = _state.value.searchQuery
             val initialFiltered = if (currentQuery.isBlank()) {
                 list

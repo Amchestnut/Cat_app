@@ -1,15 +1,20 @@
 package com.example.cat_app.all_species_screen
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil3.compose.AsyncImage
@@ -42,35 +47,35 @@ private fun AllSpeciesScreenContent(
     onSearchChange: (String) -> Unit,
     breeds: List<Breed>,
     onDetailInformationClick: (String) -> Unit
-) {
+)
+{
     Scaffold { padding ->
         Column(
             Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // 1) Search bar
+            // search bar
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = onSearchChange,
-                label       = { Text("Search breeds...") },
+                label       = { Text("Search breeds…") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 modifier    = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
             )
 
             Spacer(Modifier.height(8.dp))
 
-            // 2) Content area: Loading / Error / List
             when {
                 loading -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
                         CircularProgressIndicator()
                     }
                 }
                 error != null -> {
-                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Box(Modifier.fillMaxSize(), Alignment.Center) {
                         Text("Error: ${error.message}")
                     }
                 }
@@ -81,19 +86,88 @@ private fun AllSpeciesScreenContent(
                             .padding(horizontal = 16.dp)
                     ) {
                         items(breeds) { breed ->
-                            ListItem(
+                            Card(
+                                onClick = { onDetailInformationClick(breed.id) },
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clickable { onDetailInformationClick(breed.id) },
-                                leadingContent = {
-                                    AsyncImage(
-                                        model = breed.imageUrl,
-                                        contentDescription = breed.name,
-                                        modifier = Modifier.size(56.dp)
-                                    )
-                                },
-                                headlineContent = { Text(breed.name) }
-                            )
+                                    .padding(vertical = 6.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                ListItem(
+                                    leadingContent = {
+                                        AsyncImage(
+                                            model = breed.imageUrl,
+                                            contentDescription = breed.name,
+                                            modifier = Modifier
+                                                .size(64.dp)
+                                                .clip(RoundedCornerShape(8.dp))
+                                        )
+                                    },
+                                    headlineContent = {
+                                        Text(
+                                            breed.name,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                    },
+                                    supportingContent = {
+                                        Column(Modifier.fillMaxWidth()) {
+                                            // alt‐names or fallback
+                                            val altText = breed.altNames
+                                                ?.takeIf { it.isNotBlank() }
+                                                ?: "no alternative names"
+                                            Text(
+                                                "Alt: $altText",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                maxLines = 1, overflow = TextOverflow.Ellipsis
+                                            )
+
+                                            // truncated description
+                                            breed.description?.let { desc ->
+                                                val truncated = desc.takeIf { it.length <= 250 }
+                                                    ?: desc.take(250) + "…"
+                                                Text(
+                                                    truncated,
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    modifier = Modifier.padding(top = 4.dp),
+                                                    maxLines = 3, overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+
+                                            // temperament chips
+                                            breed.temperament
+                                                ?.split(',')
+                                                ?.map { it.trim() }
+                                                ?.take(5)
+                                                ?.takeIf { it.isNotEmpty() }
+                                                ?.let { traits ->
+                                                    Row(
+                                                        Modifier
+                                                            .horizontalScroll(rememberScrollState())
+                                                            .padding(top = 8.dp),
+                                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                    ) {
+                                                        traits.forEach { trait ->
+                                                            AssistChip(
+                                                                onClick = { /* maybe filter later */ },
+                                                                label = { Text(trait) },
+                                                                colors = AssistChipDefaults.assistChipColors(
+                                                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                                    labelColor     = MaterialTheme.colorScheme.onPrimaryContainer
+                                                                ),
+                                                                modifier = Modifier.defaultMinSize(minHeight = 28.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
