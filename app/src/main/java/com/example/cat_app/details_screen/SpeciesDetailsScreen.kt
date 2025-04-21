@@ -19,17 +19,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
-import androidx.compose.material3.CardElevation
-import androidx.compose.ui.platform.LocalContext
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SpeciesDetailsScreen(
-    viewModel: SpeciesDetailViewModel,
+    viewModel: SpeciesDetailsViewModel,
     onClose: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -46,7 +46,12 @@ fun SpeciesDetailsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(breed?.name.orEmpty(), maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                title = {
+                    Text(breed?.name.orEmpty(),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onClose) {
                         Icon(
@@ -131,6 +136,7 @@ fun SpeciesDetailsScreen(
 //                    }
 //                }
 
+
                 Spacer(Modifier.height(16.dp))
 
                 // Details Card
@@ -179,25 +185,25 @@ fun SpeciesDetailsScreen(
                 Spacer(Modifier.height(16.dp))
 
                 //  ─────── Five behavior/needs widgets ───────
-//                Column(Modifier.padding(horizontal = 16.dp)) {
-//                    listOf(
-//                        "Adaptability"    to breed!!.adaptability,
-//                        "Energy level"    to breed.energyLevel,
-//                        "Affection"       to breed.affectionLevel,
-//                        "Intelligence"    to breed.intelligence,
-//                        "Social needs"    to breed.socialNeeds
-//                    ).forEach { (label, value) ->
-//                        Text(label, style = MaterialTheme.typography.bodySmall)
-//                        LinearProgressIndicator(
-//                            progress = value / 5f,
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .height(8.dp)
-//                                .clip(RoundedCornerShape(4.dp))
-//                        )
-//                        Spacer(Modifier.height(12.dp))
-//                    }
-//                }
+                Column(Modifier.padding(horizontal = 16.dp)) {
+                    listOf(
+                        "Adaptability"    to breed!!.adaptability,
+                        "Energy level"    to breed.energyLevel,
+                        "Affection"       to breed.affectionLevel,
+                        "Intelligence"    to breed.intelligence,
+                        "Social needs"    to breed.socialNeeds
+                    ).forEach { (label, value) ->
+                        Text(label, style = MaterialTheme.typography.bodySmall)
+                        LinearProgressIndicator(
+                            progress = value / 5f,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                        )
+                        Spacer(Modifier.height(12.dp))
+                    }
+                }
 
                 Spacer(Modifier.height(16.dp))
 
@@ -208,31 +214,50 @@ fun SpeciesDetailsScreen(
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-//                    if (breed!!.rare) {
-//                        ChipColors(
-//                            onClick = { /* maybe show “why rare?” */ },
-//                            colors  = ChipDefaults.chipColors(containerColor = Color(0xFFE57373))
-//                        ) {
-//                            Text("Rare breed", color = Color.White)
-//                        }
-//                    }
+                    if (breed!!.rare) {
+                        Badge(
+                            modifier = Modifier.padding(end = 8.dp),
+                            containerColor = MaterialTheme.colorScheme.errorContainer,
+                            contentColor   = MaterialTheme.colorScheme.onErrorContainer
+                        ) {
+                            Text(
+                                text = "Rare Breed",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
+                    else {
+                        Badge(
+                            modifier = Modifier.padding(end = 8.dp),
+                            containerColor = Color(0xFF81C784), // nice green
+                            contentColor   = Color.White
+                        ) {
+                            Text(
+                                text = "Common Breed",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    }
 
                     Spacer(Modifier.weight(1f))
 
-//                    val ctx = LocalContext.current
-//                    TextButton(onClick = {
-//                        breed!!.wikipediaUrl?.let { url ->
-//                            ctx.startActivity(
-//                                Intent(Intent.ACTION_VIEW, Uri.parse(url))
-//                            )
-//                        }
-//                    }) {
-//                        Text("Learn on Wikipedia")
-//                    }
+                    val ctx = LocalContext.current
+                    TextButton(onClick = {
+                        breed!!.wikipediaUrl?.let { url ->
+                            ctx.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                            )
+                        }
+                    }) {
+                        Text("Learn on Wikipedia")
+                    }
                 }
+
+
 
                 Spacer(Modifier.height(24.dp))
             }
         }
     }
 }
+

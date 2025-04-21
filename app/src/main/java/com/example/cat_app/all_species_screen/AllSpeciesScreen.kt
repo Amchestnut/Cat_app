@@ -63,36 +63,12 @@ private fun AllSpeciesScreenContent(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // ► Background gradient
-//            Box(
-//                Modifier
-//                    .matchParentSize()
-//                    .background(
-//                        Brush.verticalGradient(
-//                            colors = listOf(
-//                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-//                                MaterialTheme.colorScheme.background
-//                            )
-//                        )
-//                    )
-//            )
-
-            // ► Or uncomment to use a drawable as a wallpaper
-
-//            Image(
-//              painter = painterResource(R.drawable.my_wallpaper),
-//              contentDescription = null,
-//              contentScale = ContentScale.Crop,
-//              modifier = Modifier.matchParentSize()
-//            )
-
-
             Column(
                 Modifier
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                // search bar
+                // 1) search bar part
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = onSearchChange,
@@ -103,7 +79,7 @@ private fun AllSpeciesScreenContent(
                         .padding(horizontal = 16.dp, vertical = 8.dp),
                 )
 
-                // 2) This Box now takes up all remaining space:
+                // 2) This Box now takes up all remaining space, for the lazy column
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -115,8 +91,6 @@ private fun AllSpeciesScreenContent(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier.matchParentSize()
                     )
-
-//                Spacer(Modifier.height(8.dp))
 
                     when {
                         loading -> {

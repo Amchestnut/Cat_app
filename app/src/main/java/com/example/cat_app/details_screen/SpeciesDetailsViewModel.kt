@@ -21,7 +21,7 @@ import com.example.cat_app.details_screen.SpeciesDetailsScreenContract.SideEffec
 
 
 @HiltViewModel
-class SpeciesDetailViewModel  @Inject constructor(
+class SpeciesDetailsViewModel  @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val allSpeciesRepository: AllSpeciesRepository,
 ) : ViewModel() {

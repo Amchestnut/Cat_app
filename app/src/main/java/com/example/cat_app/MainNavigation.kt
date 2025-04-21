@@ -13,7 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.cat_app.all_species_screen.AllSpeciesScreen
 import com.example.cat_app.all_species_screen.AllSpeciesViewModel
-import com.example.cat_app.details_screen.SpeciesDetailViewModel
+import com.example.cat_app.details_screen.SpeciesDetailsViewModel
 import com.example.cat_app.details_screen.SpeciesDetailsScreen
 
 @Composable
@@ -61,7 +61,7 @@ private fun NavGraphBuilder.species_details(
     arguments: List<NamedNavArgument>,
     navController: NavController
 ) = composable(route) {
-    val viewModel = hiltViewModel<SpeciesDetailViewModel>()
+    val viewModel = hiltViewModel<SpeciesDetailsViewModel>()
 
     Log.d("test", viewModel.toString())
     SpeciesDetailsScreen(

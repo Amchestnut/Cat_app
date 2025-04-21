@@ -75,6 +75,7 @@ dependencies {
 
     // DI
     implementation(libs.bundles.hilt)
+    implementation(libs.androidx.compose.material)
     ksp(libs.bundles.hilt.compiler)
 
 
