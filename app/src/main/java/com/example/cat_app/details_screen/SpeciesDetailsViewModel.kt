@@ -21,7 +21,7 @@ import com.example.cat_app.details_screen.SpeciesDetailsScreenContract.SideEffec
 
 
 @HiltViewModel
-class SpeciesDetailsViewModel  @Inject constructor(
+class SpeciesDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val allSpeciesRepository: AllSpeciesRepository,
 ) : ViewModel() {
@@ -71,8 +71,7 @@ class SpeciesDetailsViewModel  @Inject constructor(
             _state.update {
                 it.copy(loading = false, breed = b)
             }
-        }
-        catch (t: Throwable) {
+        } catch (t: Throwable) {
             _state.update {
                 it.copy(loading = false, error = t)
             }

@@ -2,6 +2,7 @@ package com.example.cat_app.all_species_screen
 
 import com.example.cat_app.data_for_cats.AllSpeciesAPI
 import com.example.cat_app.domain.Breed
+import kotlinx.coroutines.sync.Mutex
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -11,13 +12,18 @@ class AllSpeciesRepositoryRetrofit @Inject constructor(
     private val api: AllSpeciesAPI
 ) : AllSpeciesRepository {   // INJECT: mesto gde HILT ubacuje zavisnost
 
+    private var cache: List<Breed>? = null
 
     override suspend fun getAllSpecies(): List<Breed> {
+        cache?.let {
+            return it
+        }
+
         // 1) Dohvati raw DTO-e
         val dtoList = api.getAllBreeds()
 
-        // 2) Mapiraj ih u domain model
-        return dtoList.map { dto ->
+        // 2) mapiraj ih u breed domain model
+        cache = dtoList.map { dto ->
             Breed(
                 id               = dto.id,
                 name             = dto.name,
@@ -49,6 +55,7 @@ class AllSpeciesRepositoryRetrofit @Inject constructor(
                 wikipediaUrl     = dto.wikipediaUrl
             )
         }
-    }
 
+        return cache!!
+    }
 }
