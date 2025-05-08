@@ -11,8 +11,8 @@ interface SpeciesDetailsScreenContract {
     )
 
     sealed class UiEvent {
-        // pokrece ucitavanje "Details" za dati ID
-        data class LoadDetails(val speciesId: String) : UiEvent()
+        // pokrece ucitavanje "Details" za dati ID  (ovo je MVI)
+        data class LoadDetails(val breedId: String) : UiEvent()     // kod profe je "data OBJECT", ali mi imamo parametre u klasi i nama oni trebaju, pa je zato "data CLASS"
     }
 
     sealed class SideEffect {

@@ -10,9 +10,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import com.example.cat_app.all_species_screen.AllSpeciesScreenContract.UiState
 import com.example.cat_app.all_species_screen.AllSpeciesScreenContract.UiEvent
+import com.example.cat_app.all_species_screen.AllSpeciesScreenContract.SideEffect
 import com.example.cat_app.domain.Breed
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 // Ovom anotacijom kazem Hilt‑u da je moja klasa ViewModel i da je treba registrovati u ViewModelComponent (scope koji traje koliko i sam ViewModel).
@@ -27,6 +30,7 @@ class AllSpeciesViewModel @Inject constructor(
     val state = _state.asStateFlow()                        //  READ-ONLY  (StateFlow<UiState>), da spolja niko ne moze direktno da menja _state.
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)     // azuriranje stanja
 
+
     // MutableSharedFlow je takođe „hot“ tok, ali ne čuva poslednju vrednost (po defaultu replay = 0). Koristi se za jednokratne dogadjaje (npr. klik, swipe-to-refresh).
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) {
@@ -34,6 +38,17 @@ class AllSpeciesViewModel @Inject constructor(
             events.emit(event)  // emit(event)—u korutini ubacuješ jedan UiEvent u tok. Svi koji su collect‑ovali taj SharedFlow get‑uju taj event jednom.
         }
     }
+
+
+    // side effects, mada ih mi ovde u all species generalno nemamo?
+    private val _effect: Channel<SideEffect> = Channel()
+    val effect = _effect.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) {
+        viewModelScope.launch {
+            _effect.send(effect)
+        }
+    }
+
 
     init {
         Log.d("AllSpeciesVM", "init: line before observeEvents()")

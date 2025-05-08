@@ -6,6 +6,7 @@ interface AllSpeciesScreenContract {
 
     // 1) Stanje ekrana: sta i kako se renderuje
     data class UiState(
+        // ovde trenutno nemam nijedan OBAVEZAN argument, npr passwordId, ali da ga imam, morao bi da da prosledim taj parametar da bi napravio ovaj UI STATE
         val loading: Boolean = false,
         val allBreeds: List<Breed> = emptyList(),
         val searchQuery: String = "",

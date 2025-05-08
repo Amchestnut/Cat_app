@@ -39,22 +39,49 @@ fun SpeciesDetailsScreen(
     viewModel: SpeciesDetailsViewModel,
     onClose: () -> Unit,
 ) {
-    val uiState = viewModel.state.collectAsState()
+    val UiState = viewModel.state.collectAsState()
+    val state = UiState.value
 
+    // nebitno je gde smo ovo stavili, ovo nije imperativni kod da se izvrsava odozgo ka dole.  Bitno je na koji key reaguje
     LaunchedEffect(viewModel) {
         viewModel.effect.collect {
-            // handle side effects if needed
+            // handle side effects if needed.
+            // But here we dont have any, this is the last screen in the flow
         }
     }
 
-    val state = uiState.value
-    val breed = state.breed
+//    val breed = uiState.value.breed!!   // OVO NIJE BEZBEDNO, jer sta ako podaci ne stignu? Sve crashuje. Zato je ovaj drugi nacin ispod bezbedniji
+    when {
+        state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        state.error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Error: ${state.error.message}")
+        }
+        state.breed != null -> SpeciesDetailsScreen(
+            state = state,
+            eventPublisher = viewModel::setEvent,
+            breed = state.breed,
+            onClose = onClose
+        )
+    }
 
-    Scaffold(
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SpeciesDetailsScreen(
+    state : SpeciesDetailsScreenContract.UiState,
+    eventPublisher : (SpeciesDetailsScreenContract.UiEvent) -> Unit,
+    onClose : () -> Unit,
+    breed: Breed,
+
+
+){  Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(breed?.name.orEmpty(),
+                    Text(breed.name.orEmpty(),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -105,7 +132,7 @@ fun SpeciesDetailsScreen(
                         .clip(RoundedCornerShape(16.dp))
                 ) {
                     AsyncImage(
-                        model = breed!!.imageUrl,
+                        model = breed.imageUrl,
                         contentDescription = breed.name,
                         modifier = Modifier
                             .matchParentSize()
@@ -123,7 +150,7 @@ fun SpeciesDetailsScreen(
                             )
                     )
                     Text(
-                        text = breed?.name.orEmpty(),
+                        text = breed.name,
                         style = MaterialTheme.typography.headlineMedium.copy(color = Color.White, fontSize = 24.sp),
                         modifier = Modifier
                             .align(Alignment.BottomStart)
@@ -134,7 +161,7 @@ fun SpeciesDetailsScreen(
                 Spacer(Modifier.height(8.dp))
 
                 LifeSpanBar(
-                    lifeSpan = breed!!.lifeSpan,
+                    lifeSpan = breed.lifeSpan,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
@@ -160,7 +187,7 @@ fun SpeciesDetailsScreen(
                         .padding(horizontal = 16.dp)
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        breed?.origin?.let {
+                        breed.origin?.let {
                             Text(
                                 text = "Origin country:",
                                 style = MaterialTheme.typography.labelLarge
@@ -168,7 +195,7 @@ fun SpeciesDetailsScreen(
                             Text(text = it, style = MaterialTheme.typography.bodyMedium)
                             Spacer(Modifier.height(8.dp))
                         }
-                        breed?.temperament?.let {
+                        breed.temperament?.let {
                             Text(
                                 text = "Temperament:",
                                 style = MaterialTheme.typography.labelLarge
@@ -180,7 +207,7 @@ fun SpeciesDetailsScreen(
                             )
                             Spacer(Modifier.height(8.dp))
                         }
-                        breed?.description?.let {
+                        breed.description?.let {
                             Text(
                                 text = "About:",
                                 style = MaterialTheme.typography.labelLarge
@@ -208,7 +235,7 @@ fun SpeciesDetailsScreen(
                         .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (breed!!.rare) {
+                    if (breed.rare) {
                         Badge(
                             modifier = Modifier.padding(end = 8.dp),
                             containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -237,7 +264,7 @@ fun SpeciesDetailsScreen(
 
                     val ctx = LocalContext.current
                     TextButton(onClick = {
-                        breed!!.wikipediaUrl?.let { url ->
+                        breed.wikipediaUrl?.let { url ->
                             ctx.startActivity(
                                 Intent(Intent.ACTION_VIEW, Uri.parse(url))
                             )
