@@ -98,6 +98,11 @@ dependencies {
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
 
+    // Datastore preferences
+    implementation(libs.androidx.datastore.preferences)
+    // (Optional) if I add the core artifact too:
+    implementation(libs.androidx.datastore.core)
+
 
     // Tests
     testImplementation(libs.junit)
