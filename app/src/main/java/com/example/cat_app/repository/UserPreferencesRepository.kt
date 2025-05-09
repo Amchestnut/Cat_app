@@ -5,6 +5,7 @@ import android.provider.ContactsContract.CommonDataKinds.Nickname
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.example.cat_app.utils.userDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -20,7 +21,7 @@ private object PreferencesKeys {
 
 @Singleton  // Hilt ce kreirati tacno jednu instancu ovog repozitorijuma za ceo zivot aplikacije
 class UserPreferencesRepository @Inject constructor(    // DAGGER HILT mi obezbedjuje CONTEXT (Activity ili Application) da ne moram RUCNO da ga prosledjujem kao sto sam debilno radio u mojoj aplikaciji
-    context: Context
+    @ApplicationContext private val context: Context
 ){
     // DataStore<Preferences> instanca koju sam dobio iz onog singleton extenzije tamo u utils
     private val dataStore = context.userDataStore
