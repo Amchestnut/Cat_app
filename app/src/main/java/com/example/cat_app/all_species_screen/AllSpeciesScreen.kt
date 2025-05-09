@@ -40,7 +40,9 @@ fun AllSpeciesScreen(
         loading     = uiState.loading,
         error       = uiState.error,
         searchQuery = uiState.searchQuery,
-        onSearchChange = { viewModel.setEvent(AllSpeciesScreenContract.UiEvent.SearchQueryChanged(it)) },
+        onSearchChange = {
+            viewModel.setEvent(AllSpeciesScreenContract.UiEvent.SearchQueryChanged(it))
+        },
         breeds      = uiState.filteredBreeds,
         onDetailInformationClick = onDetailInformationClick
     )

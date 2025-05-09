@@ -4,12 +4,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cat_app.ARG_SPECIES_ID
-import com.example.cat_app.all_species_screen.AllSpeciesRepository
+import com.example.cat_app.repository.AllSpeciesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -18,7 +17,7 @@ import javax.inject.Inject
 import com.example.cat_app.details_screen.SpeciesDetailsScreenContract.UiEvent
 import com.example.cat_app.details_screen.SpeciesDetailsScreenContract.UiState
 import com.example.cat_app.details_screen.SpeciesDetailsScreenContract.SideEffect
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 
 
@@ -66,18 +65,26 @@ class SpeciesDetailsViewModel @Inject constructor(
 
 
     private fun loadDetails(id: String) = viewModelScope.launch {
-        _state.update { it.copy(loading = true, error = null) }
+        setState { copy(loading = true, error = null) }
         try {
-            // u repo‑u u praksi su ti svi podaci već keširani
-            val all = allSpeciesRepository.getAllSpecies()
-            val b = all.firstOrNull { it.id == id }
+            // u repo‑u u praksi su ti svi podaci već kesirani
+
+            // OLD
+//            val all = allSpeciesRepository.observeAllSpecies()
+//            val b = all.fir { it.id == id }
+//                ?: throw IllegalArgumentException("Breed $id not found")
+
+            val breed = allSpeciesRepository
+                .observeBreed(id)
+                .first()                 // suspend: uzmi prvu emisiju
                 ?: throw IllegalArgumentException("Breed $id not found")
-            _state.update {
-                it.copy(loading = false, breed = b)
+
+            setState {
+                copy(loading = false, breed = breed)
             }
         } catch (t: Throwable) {
-            _state.update {
-                it.copy(loading = false, error = t)
+            setState {
+                copy(loading = false, error = t)
             }
 //            _sideEffects.emit(
 //                SpeciesDetailsScreenContract.SideEffect.ShowErrorMessage(

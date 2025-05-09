@@ -46,6 +46,12 @@ android {
     hilt {
         enableAggregatingTask = true    // poboljsava performanse Gradle builda sa HILT-om
     }
+
+
+    // ne radi??? nece da ga ucita
+//    room {
+//        schemaDirectory("$projectDir/schemas")
+//    }
 }
 
 dependencies {
@@ -103,6 +109,11 @@ dependencies {
     // (Optional) if I add the core artifact too:
     implementation(libs.androidx.datastore.core)
 
+    // Room
+    implementation(libs.room.runtime)
+    annotationProcessor(libs.room.compiler)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
 
     // Tests
     testImplementation(libs.junit)

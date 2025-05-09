@@ -30,6 +30,7 @@ data class Breed(
     val socialNeeds: Int,
     val strangerFriendly: Int,
     val vocalisation: Int,
+
     val rare: Boolean,                 // from DTO “rare” field
     val wikipediaUrl: String?          // to open in browser
 )
