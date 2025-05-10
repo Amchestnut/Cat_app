@@ -9,32 +9,54 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 import com.example.cat_app.photo_viewer.PhotoViewerContract.UiState
 import com.example.cat_app.photo_viewer.PhotoViewerContract.UiEvent
+import com.example.cat_app.repository.BreedImagesRepository
+import kotlinx.coroutines.launch
 
 
 @HiltViewModel
 class PhotoViewerViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle,
+    private val repository: BreedImagesRepository,
 ) : ViewModel() {
+    // samo za debugging trenutno
     private val images: List<String> = savedStateHandle.get<List<String>>("images") ?: emptyList()
-    private val startIndex: Int = savedStateHandle.get<Int>("startIndex") ?: 0
 
-    init {
-        Log.d("PhotoViewerVM", "init: images.size=${images.size}, startIndex=$startIndex")
-    }
+    private val breedId: String = savedStateHandle.get<String>("breedId") ?: throw IllegalArgumentException("breedId missing")
+    private val startIndex: Int = savedStateHandle.get<Int>("startIndex") ?: 0
 
     private val _state = MutableStateFlow(
         UiState(
-            images = images,
-            currentIndex = startIndex
+            images = emptyList(),
+            currentIndex = startIndex,
         )
     )
     val state: StateFlow<UiState> = _state.asStateFlow()
     private fun setState(reducer : UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
+    init {
+        Log.d("PhotoViewerVM", "init: images.size=${images.size}, startIndex=$startIndex")
+        loadImages()
+    }
+
+    private fun loadImages() = viewModelScope.launch {
+        try {
+            repository.ensureBreedImages(breedId)
+            val entities = repository.observeBreedImages(breedId).first()
+            val urls = entities.map {
+                it.url
+            }
+            Log.d("PhotoViewerVM", "Loaded ${urls.size} images for $breedId")
+            _state.update { it.copy(images = urls, loading = false) }
+        } catch (t: Throwable) {
+            Log.e("PhotoViewerVM", "Error loading images", t)
+            _state.update { it.copy(error = t.toString(), loading = false) }
+        }
+    }
 
     fun setPage(index: Int) {
         Log.d("PhotoViewerVM", "setPage($index)")

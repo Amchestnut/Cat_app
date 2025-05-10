@@ -129,7 +129,9 @@ private fun NavGraphBuilder.breed_gallery(
 ) = composable(
     route = "gallery/{breedId}",
     arguments = listOf(navArgument("breedId") { type = NavType.StringType })
-) {
+) {   backStackEntry ->  // treba mi ovo zbog breedId zbog photoViewer-a
+
+    val breedId = backStackEntry.arguments?.getString("breedId")!!
     val viewModel = hiltViewModel<BreedGalleryViewModel>()
 
     BreedGalleryScreen(
@@ -138,17 +140,25 @@ private fun NavGraphBuilder.breed_gallery(
 //            // vrv cu ovde da navigiram u full-screan pager
 //            navController.navigate("photoViewer/$index")    // mozda druga ruta
 //        },
-        onPhotoClick = { urls, index ->
-            // 1) Navigiramo na PhotoViewer sa indeksom
-            val route = "photoViewer/$index"
-            navController.navigate(route) {
-                launchSingleTop = true
-            }
-            // 2) Ubacimo listu URLs u SavedStateHandle te nove destinacije
-            navController.currentBackStackEntry
-                ?.savedStateHandle
-                ?.set("images", urls)
+
+        // ni ovako nisam mogao
+//        onPhotoClick = { urls, index ->
+//            // 1) Navigiramo na PhotoViewer sa indeksom
+//            val route = "photoViewer/$index"
+//            navController.navigate(route) {
+//                launchSingleTop = true
+//            }
+//            // 2) Ubacimo listu URLs u SavedStateHandle te nove destinacije
+//            navController.currentBackStackEntry
+//                ?.savedStateHandle
+//                ?.set("images", urls)
+//        },
+
+        onPhotoClick = { _, index ->
+            // sada prosledjujem breedId i index
+            navController.navigate("photoViewer/$breedId/$index")
         },
+
         onClose = {
             navController.navigateUp()
         }
@@ -158,10 +168,14 @@ private fun NavGraphBuilder.breed_gallery(
 private fun NavGraphBuilder.photo_viewer_screen(
     navController: NavController,
 ) = composable (
-    route = "photoViewer/{startIndex}",
-    arguments = listOf(navArgument("startIndex") {
-        type = NavType.IntType
-    })
+    route = "photoViewer/{breedId}/{startIndex}",
+//    arguments = listOf(navArgument("startIndex") {
+//        type = NavType.IntType
+//    })
+    arguments = listOf(
+        navArgument("breedId") { type = NavType.StringType },
+        navArgument("startIndex") { type = NavType.IntType }
+    )
 ) {
     // now a backStackEntry exists with "startIndex" and with the
     // SavedStateHandle populated below
