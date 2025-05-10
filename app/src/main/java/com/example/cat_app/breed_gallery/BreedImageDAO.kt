@@ -16,4 +16,7 @@ interface BreedImageDAO {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(images : List<BreedImageEntity>)
 
+    @Query("SELECT COUNT(*) FROM breed_images WHERE breedId = :breedId")
+    suspend fun countByBreed(breedId: String): Int
+
 }

@@ -38,6 +38,7 @@ import com.example.cat_app.domain.Breed
 fun SpeciesDetailsScreen(
     viewModel: SpeciesDetailsViewModel,
     onClose: () -> Unit,
+    onGalleryClick: () -> Unit,
 ) {
     val UiState = viewModel.state.collectAsState()
     val state = UiState.value
@@ -62,7 +63,8 @@ fun SpeciesDetailsScreen(
             state = state,
             eventPublisher = viewModel::setEvent,
             breed = state.breed,
-            onClose = onClose
+            onClose = onClose,
+            onGalleryClick = onGalleryClick,
         )
     }
 
@@ -75,6 +77,7 @@ private fun SpeciesDetailsScreen(
     eventPublisher : (SpeciesDetailsScreenContract.UiEvent) -> Unit,
     onClose : () -> Unit,
     breed: Breed,
+    onGalleryClick : () -> Unit,
 
 
 ){  Scaffold(
@@ -275,6 +278,17 @@ private fun SpeciesDetailsScreen(
                 }
 
                 Spacer(Modifier.height(24.dp))
+
+                Button(
+                    onClick = onGalleryClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                ) {
+                    Text("View Gallery")
+                }
+
+                Spacer(Modifier.height(16.dp))
             }
         }
     }

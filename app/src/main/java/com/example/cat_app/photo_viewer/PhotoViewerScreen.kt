@@ -2,7 +2,10 @@ package com.example.cat_app.photo_viewer
 
 // TODO
 
+import android.util.Log
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.*
@@ -12,45 +15,57 @@ import androidx.hilt.navigation.compose.hiltViewModel
 //import com.google.accompanist.pager.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 
 
-//@OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
-//@Composable
-//fun PhotoViewerScreen(
-//    viewModel: PhotoViewerViewModel = hiltViewModel(),
-//    onClose: () -> Unit
-//) {
-//    val state by viewModel.state.collectAsState()
-////    val pagerState = rememberPagerState(initialPage = state.currentIndex)
-//
-//    Scaffold(
-//        topBar = {
-//            TopAppBar(
-//                title = { Text("${pagerState.currentPage + 1}/${state.images.size}") },
-//                navigationIcon = {
-//                    IconButton(onClick = onClose) {
-//                        Icon(Icons.Default.Close, contentDescription = "Close")
-//                    }
-//                }
-//            )
-//        }
-//    ) { paddingValues ->
-//        HorizontalPager(
-//            count = state.images.size,
-//            state = pagerState,
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(paddingValues)
-//        ) { page ->
-//            LaunchedEffect(page) {
-//                viewModel.setPage(page)
-//            }
-//            AsyncImage(
-//                model = state.images[page],
-//                contentDescription = null,
-//                modifier = Modifier.fillMaxSize(),
-//                contentScale = ContentScale.Fit
-//            )
-//        }
-//    }
-//}
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun PhotoViewerScreen(
+    viewModel: PhotoViewerViewModel = hiltViewModel(),
+    onClose: () -> Unit
+) {
+    val state by viewModel.state.collectAsState()
+
+    LaunchedEffect(state.images, state.currentIndex) {
+        Log.d("PhotoViewerScreen", "state: images.size=${state.images.size}, currentIndex=${state.currentIndex}")
+    }
+
+    val pagerState = rememberPagerState(
+        initialPage = state.currentIndex,
+        initialPageOffsetFraction = 0f,
+        pageCount = { state.images.size }
+    )
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("${pagerState.currentPage + 1}/${state.images.size}") },
+                navigationIcon = {
+                    IconButton(onClick = onClose) {
+                        Icon(Icons.Default.Close, null)
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) { page ->
+            // Logujemo svaki put kad pager prikaže novu stranicu
+            LaunchedEffect(page) {
+                Log.d("PhotoViewerScreen", "Displaying page=$page, url=${state.images.getOrNull(page)}")
+                viewModel.setPage(page)
+            }
+            AsyncImage(
+                model = state.images[page],
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
+        }
+    }
+}

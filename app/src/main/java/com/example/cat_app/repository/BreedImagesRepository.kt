@@ -17,18 +17,26 @@ class BreedImagesRepository @Inject constructor(
 ){
     private val dao = db.catImageDao()
 
-    // sta sam ja ovde uopste hteo nzm
-    fun observeBreedImages(breedId: String): Flow<List<BreedImage>> =
-        dao.imagesByBreed(breedId)
+    // Vraca mi sve slike od macke sa datim ID
+    // Mapiram dobijeni niz breedImageEntity-ja u moj domain model BreedImage pozivom "toDomain()"
+    fun observeBreedImages(breedId: String): Flow<List<BreedImage>> {
+        return dao.imagesByBreed(breedId)
             .map { entities ->
                 entities.map { it.toDomain() }
             }
-
-    suspend fun fetchBreedImages(breedId: String) {
-        val dtos = api.getBreedImages(breedId)
-        val entities = dtos
-            .map { it.toDomain(breedId) }
-            .map { it.toEntity() }
-        dao.insertAll(entities)
     }
+
+
+    // 1. time we fetch from the API
+    // 2. and other times we get it from ROOM database cache
+    suspend fun ensureBreedImages(breedId: String) {
+        if (dao.countByBreed(breedId) == 0) {        // samo prvi put!
+            val dtos = api.getBreedImages(breedId)
+            val entities = dtos.map {
+                it.toDomain(breedId).toEntity()
+            }
+            dao.insertAll(entities)
+        }
+    }
+
 }

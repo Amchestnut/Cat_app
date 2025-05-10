@@ -1,5 +1,8 @@
 package com.example.cat_app.breed_gallery
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class BreedImageDTO(
     val id : String,
     val url : String,

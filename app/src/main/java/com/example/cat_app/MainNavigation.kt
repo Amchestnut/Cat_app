@@ -13,10 +13,14 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.cat_app.all_species_screen.AllSpeciesScreen
 import com.example.cat_app.all_species_screen.AllSpeciesViewModel
+import com.example.cat_app.breed_gallery.BreedGalleryScreen
+import com.example.cat_app.breed_gallery.BreedGalleryViewModel
 import com.example.cat_app.details_screen.SpeciesDetailsViewModel
 import com.example.cat_app.details_screen.SpeciesDetailsScreen
 import com.example.cat_app.login_screen.LoginScreen
 import com.example.cat_app.login_screen.LoginViewModel
+import com.example.cat_app.photo_viewer.PhotoViewerScreen
+import com.example.cat_app.photo_viewer.PhotoViewerViewModel
 import com.example.cat_app.splash_screen.SplashScreen
 import com.example.cat_app.splash_screen.SplashViewModel
 
@@ -42,6 +46,16 @@ fun MainNavigation() {
                 }
             ),
             navController = navController
+        )
+
+        breed_gallery(
+            route = "gallery/{breedId}",
+            arguments = listOf(navArgument("breedId"){type=NavType.StringType}),
+            navController = navController
+        )
+
+        photo_viewer_screen(
+            navController,
         )
     }
 }
@@ -98,7 +112,63 @@ private fun NavGraphBuilder.species_details(
         // TODO: ako zelimo neki change button za nesto, mozemo ovde da dodamo
         onClose = {
             navController.navigateUp()
+        },
+        onGalleryClick = {
+            val id = viewModel.state.value.breed!!.id
+            navController.navigate("gallery/$id")
         }
     )
 
+}
+
+
+private fun NavGraphBuilder.breed_gallery(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController
+) = composable(
+    route = "gallery/{breedId}",
+    arguments = listOf(navArgument("breedId") { type = NavType.StringType })
+) {
+    val viewModel = hiltViewModel<BreedGalleryViewModel>()
+
+    BreedGalleryScreen(
+        viewModel = viewModel,
+//        onPhotoClick = { urls, index ->
+//            // vrv cu ovde da navigiram u full-screan pager
+//            navController.navigate("photoViewer/$index")    // mozda druga ruta
+//        },
+        onPhotoClick = { urls, index ->
+            // 1) Navigiramo na PhotoViewer sa indeksom
+            val route = "photoViewer/$index"
+            navController.navigate(route) {
+                launchSingleTop = true
+            }
+            // 2) Ubacimo listu URLs u SavedStateHandle te nove destinacije
+            navController.currentBackStackEntry
+                ?.savedStateHandle
+                ?.set("images", urls)
+        },
+        onClose = {
+            navController.navigateUp()
+        }
+    )
+}
+
+private fun NavGraphBuilder.photo_viewer_screen(
+    navController: NavController,
+) = composable (
+    route = "photoViewer/{startIndex}",
+    arguments = listOf(navArgument("startIndex") {
+        type = NavType.IntType
+    })
+) {
+    // now a backStackEntry exists with "startIndex" and with the
+    // SavedStateHandle populated below
+    val viewModel = hiltViewModel<PhotoViewerViewModel>()
+
+    PhotoViewerScreen(
+        viewModel = viewModel,
+        onClose = { navController.popBackStack() }
+    )
 }

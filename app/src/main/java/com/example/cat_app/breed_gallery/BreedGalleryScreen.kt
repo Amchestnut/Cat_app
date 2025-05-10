@@ -1,5 +1,6 @@
 package com.example.cat_app.breed_gallery
 
+import android.util.Log
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import coil3.compose.AsyncImage
 
@@ -20,9 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 
-/**
- * Grid of photos for a given breed. Opens from the details screen.
- */
+
+/// Grid of photos for a given breed. Opens from the breed details screen.
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BreedGalleryScreen(
@@ -87,7 +88,10 @@ private fun PhotoGrid(
             Card(
                 modifier = Modifier
                     .aspectRatio(1f)
-                    .clickable { onPhotoClick(urls, index) },
+                    .clickable {
+                        onPhotoClick(urls, index)
+                        Log.d("PhotoGrid", "Clicked image #$index → ${img.url}")
+                    },
                 shape = RoundedCornerShape(8.dp)
             ) {
                 AsyncImage(

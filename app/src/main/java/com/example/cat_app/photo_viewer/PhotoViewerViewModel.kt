@@ -1,5 +1,6 @@
 package com.example.cat_app.photo_viewer
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -21,6 +22,10 @@ class PhotoViewerViewModel @Inject constructor(
     private val images: List<String> = savedStateHandle.get<List<String>>("images") ?: emptyList()
     private val startIndex: Int = savedStateHandle.get<Int>("startIndex") ?: 0
 
+    init {
+        Log.d("PhotoViewerVM", "init: images.size=${images.size}, startIndex=$startIndex")
+    }
+
     private val _state = MutableStateFlow(
         UiState(
             images = images,
@@ -32,6 +37,7 @@ class PhotoViewerViewModel @Inject constructor(
 
 
     fun setPage(index: Int) {
+        Log.d("PhotoViewerVM", "setPage($index)")
         setState { copy(currentIndex = index) }
     }
 }
