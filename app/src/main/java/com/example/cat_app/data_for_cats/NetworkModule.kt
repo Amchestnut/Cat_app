@@ -23,6 +23,7 @@ object NetworkModule {
         ignoreUnknownKeys = true
     }
 
+    // Ovo mi pravi "oKHttpClient-a, sa intercepterom koji u svaki HTTP zahtev dodaje header "x-api-key" i jos jedan za logovanje (BODY -> pun zapis tela zahteva)
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient =
@@ -39,7 +40,7 @@ object NetworkModule {
             .build()
 
 
-    @OptIn(ExperimentalSerializationApi::class)
+    // Konfigurisem bazni URL, ubacujem taj "client" i JSON converter
     @Provides
     @Singleton
     fun provideRetrofit(client: OkHttpClient, json: Json): Retrofit =
@@ -50,6 +51,8 @@ object NetworkModule {
             .build()
 
 
+    // ovim pozivom "retrofit.create(...) dobijam IMPLEMENTACIJU interfejsa "ALLSpeciesAPI" koji sam napravio.
+    // hilt sada zna da umetne svuda interfejs gde da @Inject zatrazi.
     @Provides
     @Singleton
     fun provideAllSpeciesApi(retrofit: Retrofit): AllSpeciesAPI =

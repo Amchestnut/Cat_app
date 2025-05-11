@@ -45,16 +45,17 @@ class PhotoViewerViewModel @Inject constructor(
 
     private fun loadImages() = viewModelScope.launch {
         try {
-            repository.ensureBreedImages(breedId)
-            val entities = repository.observeBreedImages(breedId).first()
+            repository.fetchAndCacheBreedImages(breedId)
+            val entities = repository.getAllImagesForThisBreed(breedId).first()
             val urls = entities.map {
                 it.url
             }
             Log.d("PhotoViewerVM", "Loaded ${urls.size} images for $breedId")
-            _state.update { it.copy(images = urls, loading = false) }
-        } catch (t: Throwable) {
+            setState { copy(images = urls, loading = false) }
+        }
+        catch (t: Throwable) {
             Log.e("PhotoViewerVM", "Error loading images", t)
-            _state.update { it.copy(error = t.toString(), loading = false) }
+            setState { copy(error = t.toString(), loading = false) }
         }
     }
 

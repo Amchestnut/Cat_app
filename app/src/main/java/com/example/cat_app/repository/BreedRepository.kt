@@ -33,16 +33,15 @@ class BreedRepository @Inject constructor(
             .map { it?.toDomain() }
 
 
-// refresh, mozda nekad bude zatrebao
-//    override suspend fun refreshAllSpecies() = withContext(Dispatchers.IO) {
-//        val remote   = api.getAllBreeds().map { it.toEntity() }
-//        db.withTransaction { dao.upsertAll(remote) }
-//    }
-
+    // refresh, mozda nekad bude zatrebao
     override suspend fun refreshAllSpecies() = withContext(Dispatchers.IO) {
-        // 1) fetch sa mreže
-        val remote = api.getAllBreeds().map { it.toEntity() }
+        // 1) fetch sa interneta
+        val remote = api.getAllBreeds().map {
+            it.toEntity()
+        }
         // 2) upsert u bazu u transakciji
-        db.withTransaction { dao.upsertAll(remote) }
+        db.withTransaction {
+            dao.upsertAll(remote)
+        }
     }
 }

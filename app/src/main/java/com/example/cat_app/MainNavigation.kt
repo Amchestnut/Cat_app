@@ -2,6 +2,7 @@ package com.example.cat_app
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -11,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
 import com.example.cat_app.all_species_screen.AllSpeciesScreen
 import com.example.cat_app.all_species_screen.AllSpeciesViewModel
 import com.example.cat_app.breed_gallery.BreedGalleryScreen
@@ -21,6 +23,12 @@ import com.example.cat_app.login_screen.LoginScreen
 import com.example.cat_app.login_screen.LoginViewModel
 import com.example.cat_app.photo_viewer.PhotoViewerScreen
 import com.example.cat_app.photo_viewer.PhotoViewerViewModel
+import com.example.cat_app.quiz_package.QuizIntroScreen
+import com.example.cat_app.quiz_package.QuizQuestionScreen
+import com.example.cat_app.quiz_package.QuizResultScreen
+import com.example.cat_app.quiz_package.QuizScreenContract
+
+import com.example.cat_app.quiz_package.QuizViewModel
 import com.example.cat_app.splash_screen.SplashScreen
 import com.example.cat_app.splash_screen.SplashViewModel
 
@@ -57,6 +65,13 @@ fun MainNavigation() {
         photo_viewer_screen(
             navController,
         )
+
+        /// hmmm da li ovako raditi ili dodati ipak novi NAV-GRAF?
+//        quiz_screen(
+//            navController,
+//        )
+
+        quiz_graph(navController)
     }
 }
 
@@ -95,6 +110,9 @@ private fun NavGraphBuilder.all_species(
         onDetailInformationClick = { species_id ->
             navController.navigate("details/$species_id")   // mozda moze bolje da se napise
             //  za sada je ovo jedina change screen akcija, necu da mi pukne app
+        },
+        onStartQuizClick = {
+            navController.navigate("quiz")
         }
     )
 }
@@ -185,4 +203,54 @@ private fun NavGraphBuilder.photo_viewer_screen(
         viewModel = viewModel,
         onClose = { navController.popBackStack() }
     )
+}
+
+
+private fun NavGraphBuilder.quiz_graph(nav: NavController) {
+    navigation(
+        route = "quiz",
+        startDestination = "quiz/intro"
+    ) {
+
+        composable("quiz/intro") { entry ->
+            val viewModel = hiltViewModel<QuizViewModel>(entry)
+            QuizIntroScreen(
+                onStart = {
+                    viewModel.setEvent(QuizScreenContract.UiEvent.LoadQuiz)
+                    nav.navigate("quiz/questions")
+                }
+            )
+        }
+
+        composable("quiz/questions") { entry ->
+            val viewModel = hiltViewModel<QuizViewModel>(entry)
+            QuizQuestionScreen(viewModel)
+
+            // Auto-navigate kada viewmodel posalje SideEffect.NavigateToResult
+            // Iz QUESTIONS screen-a prelazimo u result.
+            LaunchedEffect(Unit) {
+                viewModel.effect.collect { effect ->
+                    when (effect) {
+                        is QuizScreenContract.SideEffect.NavigateToResult ->
+                            nav.navigate("quiz/result") {
+                                popUpTo("quiz/questions") { inclusive = true }
+                            }
+                        is QuizScreenContract.SideEffect.ShowCancelDialog ->
+                            // ovde cu da prikazem dijalog, kasnije
+                            Unit
+                        else -> Unit
+                    }
+                }
+            }
+        }
+
+        composable("quiz/result") { entry ->
+            val viewModel = hiltViewModel<QuizViewModel>(entry)
+            QuizResultScreen(
+                viewModel = viewModel,
+                onClose = { nav.popBackStack("all_species", false) },
+                onShare = { viewModel.setEvent(QuizScreenContract.UiEvent.SharePressed) }
+            )
+        }
+    }
 }

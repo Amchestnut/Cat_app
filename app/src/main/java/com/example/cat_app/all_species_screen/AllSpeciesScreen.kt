@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -33,6 +34,7 @@ import com.example.cat_app.domain.Breed
 fun AllSpeciesScreen(
     viewModel: AllSpeciesViewModel = hiltViewModel(),       // Hilt ubacuje ViewModel
     onDetailInformationClick: (String) -> Unit,             // sad id tipično String
+    onStartQuizClick: (String) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -44,7 +46,8 @@ fun AllSpeciesScreen(
             viewModel.setEvent(AllSpeciesScreenContract.UiEvent.SearchQueryChanged(it))
         },
         breeds      = uiState.filteredBreeds,
-        onDetailInformationClick = onDetailInformationClick
+        onDetailInformationClick = onDetailInformationClick,
+        onStartQuizClick = onStartQuizClick,
     )
 }
 
@@ -56,10 +59,21 @@ private fun AllSpeciesScreenContent(
     searchQuery: String,
     onSearchChange: (String) -> Unit,
     breeds: List<Breed>,
-    onDetailInformationClick: (String) -> Unit
+    onDetailInformationClick: (String) -> Unit,
+    onStartQuizClick: (String) -> Unit,
 )
 {
     Scaffold { padding ->
+
+        TopAppBar(
+            title = { Text("All Species") },
+            actions = {
+                IconButton(onClick = { onStartQuizClick("quiz") }) {
+                    Icon(Icons.Default.Quiz, contentDescription = "Kviz znanja")
+                }
+            }
+        )
+
         Box(
             Modifier
                 .fillMaxSize()

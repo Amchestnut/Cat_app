@@ -51,8 +51,8 @@ class BreedGalleryViewModel @Inject constructor(
             setState { copy(loading = false, error = null) }
 
             try {
-                repository.ensureBreedImages(id)
-                val images = repository.observeBreedImages(id).first()      // first() suspenduje dok Flow ne emituje PRVU vrednost (sto ce biti trenutni sadrzaj baze), a images dobije listu svih slika koje sam ranije sacuvao u ROOM-u
+                repository.fetchAndCacheBreedImages(id)
+                val images = repository.getAllImagesForThisBreed(id).first()      // first() suspenduje dok Flow ne emituje PRVU vrednost (sto ce biti trenutni sadrzaj baze), a images dobije listu svih slika koje sam ranije sacuvao u ROOM-u
                 setState { copy(loading = false, images = images) }
 
                 Log.d("BreedGalleryVM", "Loaded ${images.size} images: ${images.map { it.url }}")

@@ -55,7 +55,7 @@ fun PhotoViewerScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) { page ->
-            // Logujemo svaki put kad pager prikaže novu stranicu
+            // Logujemo svaki put kad pager prikaze novu stranicu, i menjamo u modelu da prikazemo trenutnu stranicu
             LaunchedEffect(page) {
                 Log.d("PhotoViewerScreen", "Displaying page=$page, url=${state.images.getOrNull(page)}")
                 viewModel.setPage(page)

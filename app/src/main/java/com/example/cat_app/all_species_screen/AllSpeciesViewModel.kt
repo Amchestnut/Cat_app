@@ -73,7 +73,7 @@ class AllSpeciesViewModel @Inject constructor(
         // 1) loading = true
         setState { copy(loading = true, error = null) }
 
-        // 2) osveži bazu iz mreže
+        // 2) osvezim bazu sa mreze, ucitam ponovo sa API-ja
         runCatching { allSpeciesRepository.refreshAllSpecies() }
             .onFailure { t ->
                 setState { copy(loading = false, error = t) }
@@ -96,7 +96,7 @@ class AllSpeciesViewModel @Inject constructor(
 
     private fun applySearch(query: String) = viewModelScope.launch {
         setState {
-            // ovde izračunam novi filtered list na osnovu query‑ja
+            // ovde izracunam novi filtered list na osnovu query‑ja
             val filtered = allBreeds.filter { it.name.contains(query, ignoreCase = true) }
             copy(
                 searchQuery = query,

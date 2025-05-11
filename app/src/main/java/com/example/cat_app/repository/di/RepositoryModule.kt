@@ -2,6 +2,8 @@ package com.example.cat_app.repository.di
 
 import com.example.cat_app.repository.AllSpeciesRepository
 import com.example.cat_app.repository.BreedRepository
+import com.example.cat_app.repository.QuizRepository
+import com.example.cat_app.repository.QuizRepositoryImpl
 
 import dagger.Module
 import dagger.Provides
@@ -34,4 +36,7 @@ import dagger.Binds
 object RepositoryModule {
     @Provides
     fun provideRepo(impl: BreedRepository): AllSpeciesRepository = impl
+
+    @Provides
+    fun provideQuizRepository(impl: QuizRepositoryImpl): QuizRepository = impl
 }

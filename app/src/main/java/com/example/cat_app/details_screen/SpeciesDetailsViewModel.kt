@@ -65,7 +65,10 @@ class SpeciesDetailsViewModel @Inject constructor(
 
 
     private fun loadDetails(id: String) = viewModelScope.launch {
-        setState { copy(loading = true, error = null) }
+        setState {
+            copy(loading = true, error = null)
+        }
+
         try {
             // u repo‑u u praksi su ti svi podaci već kesirani
 
@@ -82,15 +85,11 @@ class SpeciesDetailsViewModel @Inject constructor(
             setState {
                 copy(loading = false, breed = breed)
             }
-        } catch (t: Throwable) {
+        }
+        catch (t: Throwable) {
             setState {
                 copy(loading = false, error = t)
             }
-//            _sideEffects.emit(
-//                SpeciesDetailsScreenContract.SideEffect.ShowErrorMessage(
-//                    t.localizedMessage ?: "Unknown error"
-//                )
-//            )
         }
     }
 
