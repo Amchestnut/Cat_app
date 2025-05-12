@@ -1,5 +1,6 @@
 package com.example.cat_app.quiz_package
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +23,8 @@ import kotlinx.coroutines.launch
 class QuizViewModel @Inject constructor(
     private val repo: QuizRepository
 ): ViewModel() {
+
+    val TAG = "QuizViewModel"
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -50,24 +53,35 @@ class QuizViewModel @Inject constructor(
     // START, load sva pitanja, pripremi ih za pravi kviz
     // TODO: da li ovo odmah ili kad kliknem start?
     init {
-        setEvent(UiEvent.LoadQuiz)
+        Log.d(TAG, "Initializing ViewModel, loading quiz…")
+//        setEvent(UiEvent.LoadQuiz)    posto prvo pozivam "Intro screen", ne treba mi ovde load quiz, vec se poziva load quiz kada predjemo na QUESTIONS screen
     }
 
     // ovo moze i sa runCatching, mada je on isti kao try and catch
     private suspend fun load() {
+        Log.d(TAG, "Calling repo.generateQuiz()")
         try {
             val questions = repo.generateQuiz()
+            Log.d(TAG, "Loaded ${questions.size} questions: $questions")
             setState { copy(questions = questions) }
             startTimer()
         }
         catch (err: Throwable) {
+            Log.e(TAG, "Error loading quiz", err)
             setState { copy(error = err) }
         }
     }
 
     private fun answer(value: Any) {
         val s = _state.value
-        if (s.finished) return
+        if (s.finished){
+            Log.d(TAG, "AnswerChosen called but already finished")
+            return
+        }
+
+        val curr_question = s.questions.getOrNull(s.currentIdx)
+        Log.d(TAG, "Answering question #${s.currentIdx + 1}: $curr_question")
+        Log.d(TAG, "User chose: $value")
 
         val pts = s.questions[s.currentIdx].score(value.toString())
         setState {
@@ -77,7 +91,16 @@ class QuizViewModel @Inject constructor(
                 finished = currentIdx + 1 == questions.size
             )
         }
-        if (_state.value.finished) finish()
+
+        // samo za logovanje
+        val newState = _state.value
+        Log.d(TAG, "New state → currentIdx=${newState.currentIdx}, answers=${newState.answers}, finished=${newState.finished}")
+
+
+        if (_state.value.finished) {
+            Log.d(TAG, "All questions answered, finishing quiz…")
+            finish()
+        }
     }
 
     private fun startTimer() {
@@ -102,6 +125,7 @@ class QuizViewModel @Inject constructor(
     }
 
     private fun finish() {
+        Log.d(TAG, "finish() called, sending NavigateToResult")
         timerJob?.cancel()
         _effect.trySend(SideEffect.NavigateToResult)
     }

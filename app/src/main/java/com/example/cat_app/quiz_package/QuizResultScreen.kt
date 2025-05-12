@@ -23,8 +23,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.cat_app.quiz_package.questions.ImageToNameQuestion
-import com.example.cat_app.quiz_package.questions.LifeSpanQuestion
-import com.example.cat_app.quiz_package.questions.OriginQuestion
 import com.example.cat_app.quiz_package.QuizScreenContract.UiState
 import com.example.cat_app.quiz_package.QuizScreenContract.UiEvent
 import com.example.cat_app.quiz_package.QuizScreenContract.SideEffect

@@ -3,6 +3,7 @@ package com.example.cat_app
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
@@ -206,50 +207,113 @@ private fun NavGraphBuilder.photo_viewer_screen(
 }
 
 
-private fun NavGraphBuilder.quiz_graph(nav: NavController) {
-    navigation(
-        route = "quiz",
-        startDestination = "quiz/intro"
-    ) {
+// radi , ali izgleda pravim 3 instance VIEW MODELA, pa se restartuje..
+//private fun NavGraphBuilder.quiz_graph(nav: NavController) {
+//    navigation(
+//        route = "quiz",
+//        startDestination = "quiz/intro"
+//    ) {
+//
+//        composable("quiz/intro") { entry ->
+//            val viewModel = hiltViewModel<QuizViewModel>(entry)
+//            QuizIntroScreen(
+//                onStart = {
+//                    viewModel.setEvent(QuizScreenContract.UiEvent.LoadQuiz)
+//                    nav.navigate("quiz/questions")
+//                }
+//            )
+//        }
+//
+//        composable("quiz/questions") { entry ->
+//            val viewModel = hiltViewModel<QuizViewModel>(entry)
+//            QuizQuestionScreen(viewModel)
+//
+//            // Auto-navigate kada viewmodel posalje SideEffect.NavigateToResult
+//            // Iz QUESTIONS screen-a prelazimo u result.
+//            LaunchedEffect(Unit) {
+//                viewModel.effect.collect { effect ->
+//                    when (effect) {
+//                        is QuizScreenContract.SideEffect.NavigateToResult ->
+//                            nav.navigate("quiz/result") {
+//                                popUpTo("quiz/questions") { inclusive = true }
+//                            }
+//                        is QuizScreenContract.SideEffect.ShowCancelDialog ->
+//                            // ovde cu da prikazem dijalog, kasnije
+//                            Unit
+//                        else -> Unit
+//                    }
+//                }
+//            }
+//        }
+//
+//        composable("quiz/result") { entry ->
+//            val viewModel = hiltViewModel<QuizViewModel>(entry)
+//            QuizResultScreen(
+//                viewModel = viewModel,
+//                onClose = { nav.popBackStack("all_species", false) },
+//                onShare = { viewModel.setEvent(QuizScreenContract.UiEvent.SharePressed) }
+//            )
+//        }
+//    }
+//}
 
-        composable("quiz/intro") { entry ->
-            val viewModel = hiltViewModel<QuizViewModel>(entry)
+private fun NavGraphBuilder.quiz_graph(nav: NavController) {
+    navigation(route = "quiz", startDestination = "quiz/intro") {
+
+        composable("quiz/intro") { backStackEntry ->
+            // ovo je backStackEntry za DESTINACIJU, ali mi želimo VM na nivou "quiz" grafa:
+            val parentEntry = remember(backStackEntry) { nav.getBackStackEntry("quiz") }
+            val vm = hiltViewModel<QuizViewModel>(parentEntry)
+
             QuizIntroScreen(
                 onStart = {
-                    viewModel.setEvent(QuizScreenContract.UiEvent.LoadQuiz)
+                    vm.setEvent(QuizScreenContract.UiEvent.LoadQuiz)  // ako hoćeš da ponovo učitaš
                     nav.navigate("quiz/questions")
                 }
             )
-        }
 
-        composable("quiz/questions") { entry ->
-            val viewModel = hiltViewModel<QuizViewModel>(entry)
-            QuizQuestionScreen(viewModel)
-
-            // Auto-navigate kada viewmodel posalje SideEffect.NavigateToResult
-            // Iz QUESTIONS screen-a prelazimo u result.
             LaunchedEffect(Unit) {
-                viewModel.effect.collect { effect ->
-                    when (effect) {
+                vm.effect.collect { eff ->
+                    when (eff) {
                         is QuizScreenContract.SideEffect.NavigateToResult ->
                             nav.navigate("quiz/result") {
                                 popUpTo("quiz/questions") { inclusive = true }
                             }
-                        is QuizScreenContract.SideEffect.ShowCancelDialog ->
-                            // ovde cu da prikazem dijalog, kasnije
-                            Unit
-                        else -> Unit
+                        else -> {}
                     }
                 }
             }
         }
 
-        composable("quiz/result") { entry ->
-            val viewModel = hiltViewModel<QuizViewModel>(entry)
+        composable("quiz/questions") { backStackEntry ->
+            // opet isti parentEntry za ceo "quiz" graf
+            val parentEntry = remember(backStackEntry) { nav.getBackStackEntry("quiz") }
+            val vm = hiltViewModel<QuizViewModel>(parentEntry)
+
+            LaunchedEffect(vm.effect) {
+                vm.effect.collect { eff ->
+                    when (eff) {
+                        is QuizScreenContract.SideEffect.NavigateToResult ->
+                            nav.navigate("quiz/result") {
+                                popUpTo("quiz/questions") { inclusive = true }
+                            }
+                        else -> {}
+                    }
+                }
+            }
+
+            QuizQuestionScreen(vm)
+        }
+
+        composable("quiz/result") { backStackEntry ->
+            // i ovde ista instanca
+            val parentEntry = remember(backStackEntry) { nav.getBackStackEntry("quiz") }
+            val vm = hiltViewModel<QuizViewModel>(parentEntry)
+
             QuizResultScreen(
-                viewModel = viewModel,
+                viewModel = vm,
                 onClose = { nav.popBackStack("all_species", false) },
-                onShare = { viewModel.setEvent(QuizScreenContract.UiEvent.SharePressed) }
+                onShare = { vm.setEvent(QuizScreenContract.UiEvent.SharePressed) }
             )
         }
     }

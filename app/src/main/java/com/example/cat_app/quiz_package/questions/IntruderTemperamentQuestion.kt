@@ -1,9 +1,8 @@
 package com.example.cat_app.quiz_package.questions
 
-// koja je ovo rasa macke?  image + 4 imena
-data class ImageToNameQuestion(
+data class IntruderTemperamentQuestion(
     override val id: String,
-    override val questionText: String = "Koja je rasa mačke sa slike?",
+    override val questionText: String = "Izbaci uljeza!",
     override val imageUrl: String,
     override val choices: List<String>,
     private val correctChoice: String
