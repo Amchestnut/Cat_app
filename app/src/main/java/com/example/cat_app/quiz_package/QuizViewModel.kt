@@ -12,10 +12,12 @@ import com.example.cat_app.quiz_package.QuizScreenContract.SideEffect
 import com.example.cat_app.repository.QuizRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 
@@ -48,7 +50,7 @@ class QuizViewModel @Inject constructor(
     private val _effect = Channel<SideEffect>()
     val effect = _effect.receiveAsFlow()
 
-    private var timerJob: Job? = null       // jos necemo ovo
+    private var timerJob: Job? = null
 
     // START, load sva pitanja, pripremi ih za pravi kviz
     // TODO: da li ovo odmah ili kad kliknem start?
@@ -64,6 +66,8 @@ class QuizViewModel @Inject constructor(
             val questions = repo.generateQuiz()
             Log.d(TAG, "Loaded ${questions.size} questions: $questions")
             setState { copy(questions = questions) }
+//            setState { copy(questions = questions, answers = List(questions.size) { null }, currentIdx = 0, finished = false, remainingMillis = TOTAL_TIME_MS) }
+
             startTimer()
         }
         catch (err: Throwable) {
@@ -106,10 +110,10 @@ class QuizViewModel @Inject constructor(
     private fun startTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
-//            while (isActive) {
-//                delay(1_000)
-//                setEvent(UiEvent.Tick)
-//            }
+            while (isActive) {
+                delay(1_000)
+                setEvent(UiEvent.Tick)
+            }
             // TODO, ne razumem zasto mi ne radi ovaj isActive
         }
     }

@@ -288,10 +288,10 @@ private fun NavGraphBuilder.quiz_graph(nav: NavController) {
         composable("quiz/questions") { backStackEntry ->
             // opet isti parentEntry za ceo "quiz" graf
             val parentEntry = remember(backStackEntry) { nav.getBackStackEntry("quiz") }
-            val vm = hiltViewModel<QuizViewModel>(parentEntry)
+            val viewModel = hiltViewModel<QuizViewModel>(parentEntry)
 
-            LaunchedEffect(vm.effect) {
-                vm.effect.collect { eff ->
+            LaunchedEffect(viewModel.effect) {
+                viewModel.effect.collect { eff ->
                     when (eff) {
                         is QuizScreenContract.SideEffect.NavigateToResult ->
                             nav.navigate("quiz/result") {
@@ -302,18 +302,21 @@ private fun NavGraphBuilder.quiz_graph(nav: NavController) {
                 }
             }
 
-            QuizQuestionScreen(vm)
+            QuizQuestionScreen(
+                viewModel = viewModel,
+                onExitQuiz = { nav.popBackStack("all_species", false) },
+            )
         }
 
         composable("quiz/result") { backStackEntry ->
             // i ovde ista instanca
             val parentEntry = remember(backStackEntry) { nav.getBackStackEntry("quiz") }
-            val vm = hiltViewModel<QuizViewModel>(parentEntry)
+            val viewModel = hiltViewModel<QuizViewModel>(parentEntry)
 
             QuizResultScreen(
-                viewModel = vm,
+                viewModel = viewModel,
                 onClose = { nav.popBackStack("all_species", false) },
-                onShare = { vm.setEvent(QuizScreenContract.UiEvent.SharePressed) }
+                onShare = { viewModel.setEvent(QuizScreenContract.UiEvent.SharePressed) }
             )
         }
     }
