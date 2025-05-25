@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import com.example.cat_app.core.ui.MainNavigation
+//import com.example.cat_app.core.ui.bottombarnavigation.AppNavigation
 import com.example.cat_app.core.ui.theme.Cat_appTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -16,6 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             Cat_appTheme {
+//                AppNavigation()
                 MainNavigation()
             }
         }

@@ -7,6 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+
+    // added for ROOM
+    alias(libs.plugins.jetpack.room)
 }
 
 android {
@@ -49,9 +52,9 @@ android {
 
 
     // ne radi??? nece da ga ucita
-//    room {
-//        schemaDirectory("$projectDir/schemas")
-//    }
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
 }
 
 dependencies {

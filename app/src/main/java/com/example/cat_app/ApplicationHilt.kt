@@ -1,4 +1,4 @@
-package com.example.cat_app.core.di
+package com.example.cat_app
 
 import android.app.Application
 import android.util.Log

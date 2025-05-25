@@ -20,6 +20,33 @@ import androidx.wear.compose.material.CircularProgressIndicator
 // takodje, krsilo bi MVI da nam je navigacija deo UI STATE umesto da bude deo SideEffect-a
 // takodje, krislo bi mvi kada bismo iz VIEWMODELA direktno zvali navController (mesam UI dependenci u viewmodelu)
 
+//@Composable
+//fun SplashScreen(
+//    viewModel: SplashViewModel = hiltViewModel(),
+//    navController: NavController
+//) {
+//    // u tvom slučaju state je uvek Loading, pa ga možeš iskoristiti za prikaz spinnera
+//    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//        CircularProgressIndicator()
+//    }
+//
+//    // ovo je dobro MVI, mi ovde "hvatamo" side effect i izvrsavamo ga (navigacija, toast, sta god)
+//    LaunchedEffect (Unit) {
+//        viewModel.effect.collect { side ->
+//            when (side) {
+//                is SplashScreenContract.SideEffect.NavigateToOnLogin ->
+//                    navController.navigate("auth") { popUpTo("splash") { inclusive = true } }
+//
+//                is SplashScreenContract.SideEffect.NavigateToMain ->
+//                    navController.navigate("main") { popUpTo("splash") { inclusive = true } }
+//            }
+//        }
+//    }
+//}
+
+
+
+// stari splash screen (za staru navigaciju)
 @Composable
 fun SplashScreen(
     viewModel: SplashViewModel = hiltViewModel(),
@@ -43,4 +70,3 @@ fun SplashScreen(
         }
     }
 }
-

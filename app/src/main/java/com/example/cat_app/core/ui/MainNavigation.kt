@@ -35,6 +35,8 @@ import com.example.cat_app.features.splash_screen.SplashViewModel
 
 @Composable
 fun MainNavigation() {
+    // NavController je glavni
+    // Ovde ispod haube mi ustvari sa "rememberNavController()" pravimo navHostController - tj konkretnu implementaciju navControllera
     val navController = rememberNavController()     // I needed to import the library compose navigation for this
 
     NavHost(
@@ -67,10 +69,6 @@ fun MainNavigation() {
             navController,
         )
 
-        /// hmmm da li ovako raditi ili dodati ipak novi NAV-GRAF?
-//        quiz_screen(
-//            navController,
-//        )
 
         quiz_graph(navController)
     }
