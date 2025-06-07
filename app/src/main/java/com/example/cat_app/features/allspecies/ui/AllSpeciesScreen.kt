@@ -1,9 +1,11 @@
 package com.example.cat_app.features.allspecies.ui
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,7 +13,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
+import androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,22 +62,44 @@ private fun AllSpeciesScreenContent(
     onStartQuizClick: (String) -> Unit,
 )
 {
-    Scaffold { padding ->
+    val listState = rememberSaveable(
+        saver = LazyListState.Saver
+    ) {
+        LazyListState()
+    }
 
-        TopAppBar(
-            title = { Text("All Species") },
-            actions = {
-                IconButton(onClick = { onStartQuizClick("quiz") }) {
-                    Icon(Icons.Default.Quiz, contentDescription = "Kviz znanja")
-                }
-            }
-        )
+    LaunchedEffect(Unit) {
+        Log.d("🐱AllSpecies", "AllSpeciesScreenContent: scroll = $listState")
+    }
 
-        Box(
-            Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
+//    Scaffold { padding ->
+//        contentWindowInsets = WindowInsets(0),
+//
+//        TopAppBar(
+//            title = { Text("All Species") },
+//            actions = {
+//                IconButton(onClick = { onStartQuizClick("quiz") }) {
+//                    Icon(Icons.Default.Quiz, contentDescription = "Kviz znanja")
+//                }
+//            }
+//        )
+//
+//        Box(
+//            Modifier
+//                .fillMaxSize()
+//                .padding(padding)
+//        )
+
+    Scaffold(
+        // turn off the default status-bar/nav-bar padding
+        contentWindowInsets = WindowInsets(0),
+        topBar = {
+            TopAppBar(
+                title = { Text("All Species") },
+                actions = { IconButton({ /*…*/ }) { Icon(Icons.Default.Quiz, null) } }
+            )
+        }
+    ) { padding ->
             Column(
                 Modifier
                     .fillMaxSize()
@@ -116,7 +142,8 @@ private fun AllSpeciesScreenContent(
                         }
                         else -> {
                             LazyColumn(
-                                Modifier
+                                state = listState,
+                                modifier = Modifier
                                     .fillMaxSize()
                                     .padding(horizontal = 16.dp)
                             ) {
@@ -212,5 +239,4 @@ private fun AllSpeciesScreenContent(
 
             }
         }
-    }
 }

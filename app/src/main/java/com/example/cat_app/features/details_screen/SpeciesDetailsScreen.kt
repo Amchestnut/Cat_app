@@ -78,9 +78,8 @@ private fun SpeciesDetailsScreen(
     onClose : () -> Unit,
     breed: Breed,
     onGalleryClick : () -> Unit,
-
-
-    ){  Scaffold(
+) {
+    Scaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -126,6 +125,7 @@ private fun SpeciesDetailsScreen(
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(paddingValues)
+                    .padding(horizontal = 2.dp)
             ) {
                 Box(
                     Modifier
@@ -296,42 +296,55 @@ private fun SpeciesDetailsScreen(
 
 
 @Composable
-fun BreedStats(breed: Breed) {
-    Column(Modifier.padding(16.dp)) {
+private fun BreedStats(breed: Breed) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Text(
             text = "Behavioral Profile",
             style = MaterialTheme.typography.titleMedium
         )
+
         Spacer(Modifier.height(12.dp))
 
-        // Row 1: 3 stats
+        // ─── First row ─────────────────────────────────────────
         Row(
             Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            StatCard("Adaptability",    breed.adaptability,    Modifier.weight(1f))
-            StatCard("Energy",         breed.energyLevel,     Modifier.weight(1f))
-            StatCard("Affection",      breed.affectionLevel,  Modifier.weight(1f))
+            StatCard("Adaptability",  breed.adaptability,   Modifier.weight(1f))
+            StatCard("Energy",        breed.energyLevel,    Modifier.weight(1f))
+            StatCard("Affection",     breed.affectionLevel, Modifier.weight(1f))
         }
 
         Spacer(Modifier.height(12.dp))
 
-        // Row 2: 3 stats
+        // ─── Second row ────────────────────────────────────────
         Row(
             Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            StatCard("Intelligence",   breed.intelligence,    Modifier.weight(1f))
-            StatCard("Social Needs",   breed.socialNeeds,     Modifier.weight(1f))
-            StatCard("Grooming",      breed.grooming,  Modifier.weight(1f))
+            StatCard("Intelligence",  breed.intelligence,   Modifier.weight(1f))
+            StatCard("Social Needs",  breed.socialNeeds,    Modifier.weight(1f))
+            StatCard("Grooming",      breed.grooming,       Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-fun StatCard(label: String, value: Int, modifier: Modifier = Modifier) {
-    // animate from 0 to value 5 on first composition
-    val progress by animateFloatAsState(targetValue = value / 5f)
+fun StatCard(
+    label: String,
+    value: Int,
+    modifier: Modifier = Modifier
+) {
+    // animate progress from 0→value/5
+    val progress by animateFloatAsState(targetValue = (value / 5f).coerceIn(0f,1f))
 
     Card(
         modifier = modifier,
@@ -339,32 +352,34 @@ fun StatCard(label: String, value: Int, modifier: Modifier = Modifier) {
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(
-            Modifier
+            modifier = Modifier
                 .padding(12.dp)
                 .wrapContentHeight(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
-                    progress = progress,
-                    modifier = Modifier.size(56.dp),
+                    progress   = progress,
+                    modifier   = Modifier.size(56.dp),
                     strokeWidth = 6.dp
                 )
                 Text(
-                    text = "${(progress * 100).toInt()}%",
+                    text  = "${(progress * 100).toInt()}%",
                     style = MaterialTheme.typography.bodySmall
                 )
             }
+
             Spacer(Modifier.height(8.dp))
+
             Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
+                text      = label,
+                style     = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                modifier  = Modifier.fillMaxWidth()
             )
         }
     }
 }
-
 
 @Composable
 fun LifeSpanBar(

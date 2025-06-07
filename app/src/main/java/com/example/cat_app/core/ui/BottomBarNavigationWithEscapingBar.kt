@@ -6,7 +6,7 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun BottomBarNavigationWithEscapingBar () {
-    val navController : NavHostController= rememberNavController()
+//    val navController : NavHostController= rememberNavController()
     
 
 }
