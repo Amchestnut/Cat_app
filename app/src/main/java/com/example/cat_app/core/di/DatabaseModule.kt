@@ -2,6 +2,7 @@ package com.example.cat_app.core.di
 
 import com.example.cat_app.core.database.AppDatabase
 import com.example.cat_app.core.database.AppDatabaseBuilder
+import com.example.cat_app.features.quiz.data.local.QuizResultDAO
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -17,4 +18,9 @@ object DatabaseModule {
     fun provideDb(builder: AppDatabaseBuilder) : AppDatabase {
         return builder.build()
     }
+
+//    @Provides
+//    fun provideQuizResultDao(db: AppDatabase): QuizResultDAO =
+//        db.quizResultDao()
+
 }

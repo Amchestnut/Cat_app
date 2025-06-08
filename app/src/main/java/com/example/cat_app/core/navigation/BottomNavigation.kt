@@ -225,9 +225,6 @@ fun BottomNavigation() {
 
                         QuizQuestionScreen(
                             viewModel = vm,
-//                            onExitQuiz = {
-//                                navController.popBackStack(BottomNavScreen.AllSpecies.route, false)
-//                            }
                             onExitQuiz = {
                                 // collapse the *entire* quiz graph & show Cats
                                 navController.navigate(BottomNavScreen.AllSpecies.route) {
@@ -237,13 +234,6 @@ fun BottomNavigation() {
                                     launchSingleTop = true
                                 }
                             }
-                            // new
-//                            onExitQuiz = {
-//                                navController.popBackStack(
-//                                    BottomNavScreen.AllSpecies.route,
-//                                    false
-//                                )
-//                            }
                         )
                     }
 
@@ -253,14 +243,6 @@ fun BottomNavigation() {
 
                         QuizResultScreen(
                             viewModel = vm,
-//                            onClose = { navController.popBackStack(BottomNavScreen.AllSpecies.route, false) },
-//                            onClose = {
-//                                // <-- simply pop everything back to the "all_species" destination
-//                                navController.popBackStack(
-//                                    BottomNavScreen.AllSpecies.route,
-//                                    inclusive = false
-//                                )
-//                            },
 
                             onClose = {
                                 Log.d("NAV", "🎯 Done with quiz — popping it and going to Cats")

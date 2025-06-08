@@ -10,6 +10,7 @@ import com.example.cat_app.features.quiz.ui.QuizScreenContract.UiState
 import com.example.cat_app.features.quiz.ui.QuizScreenContract.UiEvent
 import com.example.cat_app.features.quiz.ui.QuizScreenContract.SideEffect
 import com.example.cat_app.features.quiz.data.repository.QuizRepository
+import com.example.cat_app.features.quiz.data.repository.QuizResultRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -23,7 +24,8 @@ import kotlinx.coroutines.launch
 
 @HiltViewModel
 class QuizViewModel @Inject constructor(
-    private val repo: QuizRepository
+    private val repo: QuizRepository,
+    private val quizResultRepository: QuizResultRepository
 ): ViewModel() {
 
     val TAG = "QuizViewModel"
@@ -114,7 +116,6 @@ class QuizViewModel @Inject constructor(
                 delay(1_000)
                 setEvent(UiEvent.Tick)
             }
-            // TODO, ne razumem zasto mi ne radi ovaj isActive
         }
     }
 
@@ -129,9 +130,16 @@ class QuizViewModel @Inject constructor(
     }
 
     private fun finish() {
+        Log.d(TAG, "finish(): local save done, now navigating to result")
+        viewModelScope.launch {
+            quizResultRepository.saveLocal(totalScore().toDouble())
+        }
+
         Log.d(TAG, "finish() called, sending NavigateToResult")
         timerJob?.cancel()
         _effect.trySend(SideEffect.NavigateToResult)
+
+
     }
 
     private fun hardCancel() {

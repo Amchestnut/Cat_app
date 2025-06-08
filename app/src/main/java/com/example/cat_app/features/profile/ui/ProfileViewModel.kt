@@ -1,9 +1,11 @@
 package com.example.cat_app.features.profile.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cat_app.core.datastore.UserPreferencesRepository
 import com.example.cat_app.features.profile.ui.ProfileScreenContract.*
+import com.example.cat_app.features.quiz.data.repository.QuizResultRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -12,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
-    private val userPrefs: UserPreferencesRepository
+    private val userPrefs: UserPreferencesRepository,
+    private val quizRepo: QuizResultRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -22,17 +25,35 @@ class ProfileViewModel @Inject constructor(
     val effect = _effect.receiveAsFlow()
 
     init {
-        // load stored profile into UiState
+        loadData()
+    }
+
+    private fun loadData() {
         viewModelScope.launch {
-            combine(
-                userPrefs.nameFlow,
-                userPrefs.nicknameFlow,
-                userPrefs.emailFlow
-            ) { name, nick, email ->
-                UiState(name = name, nickname = nick, email = email, loading = false)
+            try {
+                // jednom uzmemo snapshot vrednosti iz svih izvora
+                val name      = userPrefs.nameFlow.first()
+                val nickname  = userPrefs.nicknameFlow.first()
+                val email     = userPrefs.emailFlow.first()
+
+                val history   = quizRepo.history().first()
+                val bestScore = quizRepo.bestScore().first()
+                val bestRank  = quizRepo.bestRanking().first()
+
+                Log.d("ProfileVM", "loadData(): fetched history size=${history.size}")
+
+                _state.value = UiState(
+                    name        = name,
+                    nickname    = nickname,
+                    email       = email,
+                    history     = history,
+                    bestScore   = bestScore,
+                    bestRanking = bestRank,
+                    loading     = false
+                )
+            } catch (t: Throwable) {
+                _state.update { it.copy(loading = false, error = t) }
             }
-                .catch { t -> _state.update { it.copy(loading = false, error = t) } }
-                .collect { _state.value = it }
         }
     }
 

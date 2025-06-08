@@ -6,14 +6,17 @@ import com.example.cat_app.features.breedgallery.data.local.BreedImageDAO
 import com.example.cat_app.features.breedgallery.data.local.BreedImageEntity
 import com.example.cat_app.features.allspecies.data.local.BreedDAO
 import com.example.cat_app.features.allspecies.data.local.BreedEntity
+import com.example.cat_app.features.quiz.data.local.QuizResultDAO
+import com.example.cat_app.features.quiz.data.local.QuizResultEntity
 
 // Ovde moraju da stoje ::::SVI:::: ENTITETI
 @Database(
     entities = [
         BreedEntity::class,
         BreedImageEntity::class,
+        QuizResultEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false,    // ne radi glupi gradle pa nmg da stavim ono true, set schema location
 )
 
@@ -24,5 +27,5 @@ import com.example.cat_app.features.allspecies.data.local.BreedEntity
 abstract class AppDatabase : RoomDatabase(){
     abstract fun breedDao() : BreedDAO
     abstract fun catImageDao() : BreedImageDAO
-//    abstract fun quizDao() : QuizDAO    ne jos
+    abstract fun quizResultDao() : QuizResultDAO   // ovo sam na kraju dodao, ovo iz rooma
 }

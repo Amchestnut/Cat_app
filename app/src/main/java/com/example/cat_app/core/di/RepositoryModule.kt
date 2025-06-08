@@ -4,6 +4,8 @@ import com.example.cat_app.features.allspecies.data.repository.AllSpeciesReposit
 import com.example.cat_app.features.allspecies.data.repository.BreedRepository
 import com.example.cat_app.features.quiz.data.repository.QuizRepository
 import com.example.cat_app.features.quiz.data.repository.QuizRepositoryImpl
+import com.example.cat_app.features.quiz.data.repository.QuizResultRepository
+import com.example.cat_app.features.quiz.data.repository.QuizResultRepositoryImpl
 
 import dagger.Module
 import dagger.Provides
@@ -37,4 +39,20 @@ object RepositoryModule {
 
     @Provides
     fun provideQuizRepository(impl: QuizRepositoryImpl): QuizRepository = impl
+
+    @Provides
+    fun bindQuizResultRepository(impl: QuizResultRepositoryImpl): QuizResultRepository = impl
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,5 +1,7 @@
 package com.example.cat_app.features.profile.ui
 
+import com.example.cat_app.features.quiz.data.local.QuizResultEntity
+
 interface ProfileScreenContract {
 
     data class UiState(
@@ -7,7 +9,12 @@ interface ProfileScreenContract {
         val nickname: String = "",
         val email: String = "",
         val loading: Boolean = true,
-        val error: Throwable? = null
+        val error: Throwable? = null,
+
+        // novo, za leaderboard
+        val history: List<QuizResultEntity> = emptyList(),
+        val bestScore: Double = 0.0,
+        val bestRanking: Int? = null,
     )
 
     sealed class UiEvent {

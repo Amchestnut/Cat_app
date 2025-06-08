@@ -30,6 +30,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.cat_app.core.ui.theme.ErrorRed600
+import com.example.cat_app.core.ui.theme.ScoreYellow
+import com.example.cat_app.core.ui.theme.SuccessGreen
+import com.example.cat_app.core.ui.theme.WarningYellow
 import com.example.cat_app.features.allspecies.domain.Breed
 
 
@@ -253,7 +257,7 @@ private fun SpeciesDetailsScreen(
                     else {
                         Badge(
                             modifier = Modifier.padding(end = 8.dp),
-                            containerColor = Color(0xFF81C784), // nice green
+                            containerColor = ScoreYellow, // nice green
                             contentColor   = Color.White
                         ) {
                             Text(
@@ -418,7 +422,7 @@ fun LifeSpanBar(
                     .fillMaxWidth(animated)
                     .background(
                         Brush.horizontalGradient(
-                            listOf(Color(0xFF4CAF50), Color(0xFFFFEB3B), Color(0xFFF44336))
+                            listOf(SuccessGreen  , WarningYellow  , ErrorRed600)
                         )
                     )
             )

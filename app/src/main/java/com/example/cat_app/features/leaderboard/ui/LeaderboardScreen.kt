@@ -37,12 +37,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cat_app.R
+import com.example.cat_app.core.ui.theme.CatBeige
+import com.example.cat_app.core.ui.theme.CatBrown
+import com.example.cat_app.core.ui.theme.CatWhite
+import com.example.cat_app.core.ui.theme.ScoreYellow
+import com.example.cat_app.core.ui.theme.SuccessGreen
 import com.example.cat_app.features.leaderboard.ui.LeaderboardContract.LeaderboardItem
 
-// Cat-themed colors
-private val CatBeige = Color(0xFFF5F5DC)
-private val CatBrown = Color(0xFFA67B5B)
-private val CatWhite = Color(0xFFFFFFFF)
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -211,7 +213,7 @@ private fun PodiumItem(
                     Icon(
                         imageVector = Icons.Outlined.Star,
                         contentDescription = "Score",
-                        tint = Color(0xFFFFC107),
+                        tint = ScoreYellow,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(Modifier.width(4.dp))
@@ -226,7 +228,7 @@ private fun PodiumItem(
                     Icon(
                         imageVector = Icons.Filled.Pets,
                         contentDescription = "Plays",
-                        tint = Color(0xFF4CAF50),
+                        tint = SuccessGreen,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(Modifier.width(4.dp))
@@ -245,7 +247,7 @@ private fun PodiumItem(
 private fun LeaderboardRow(item: LeaderboardItem) {
     Card(
         // bež kartica!!
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5DC)),
+        colors = CardDefaults.cardColors(CatBeige),
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min),
@@ -265,11 +267,11 @@ private fun LeaderboardRow(item: LeaderboardItem) {
                 Text(item.nickname, style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Outlined.Star, contentDescription = null, tint = Color(0xFFFFC107))
+                    Icon(Icons.Outlined.Star, contentDescription = null, tint = ScoreYellow )
                     Spacer(Modifier.width(4.dp))
                     Text(String.format("%.2f", item.result), style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.width(16.dp))
-                    Icon(Icons.Filled.Pets, contentDescription = null, tint = Color(0xFF4CAF50))
+                    Icon(Icons.Filled.Pets, contentDescription = null, tint = SuccessGreen)
                     Spacer(Modifier.width(4.dp))
                     Text("${item.plays} plays", style = MaterialTheme.typography.bodyMedium)
                 }
