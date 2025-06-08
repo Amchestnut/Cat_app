@@ -57,6 +57,8 @@ import com.example.cat_app.features.splash_screen.SplashScreen
 import com.example.cat_app.features.splash_screen.SplashViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navigation
+import com.example.cat_app.features.leaderboard.ui.LeaderboardScreen
+import com.example.cat_app.features.leaderboard.ui.LeaderboardViewModel
 import com.example.cat_app.features.profile.ui.EditProfileScreen
 import com.example.cat_app.features.profile.ui.ProfileScreen
 
@@ -276,7 +278,10 @@ fun BottomNavigation() {
                 }
 
                 composable(BottomNavScreen.Leaderboard.route) {
-                    LeaderboardScreen()
+                    val viewModel = hiltViewModel<LeaderboardViewModel>()
+                    LeaderboardScreen(
+                        viewModel = viewModel
+                    )
                 }
 
                 composable(BottomNavScreen.Profile.route) {
@@ -341,16 +346,16 @@ fun BottomNavigation() {
 
 // --- PLACEHOLDER SCREENS ---
 
-@Composable
-fun LeaderboardScreen() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-    ) {
-        Text("Leaderboard")
-    }
-}
+//@Composable
+//fun LeaderboardScreen() {
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+//    ) {
+//        Text("Leaderboard")
+//    }
+//}
 
 //@Composable
 //fun ProfileScreen(onEditClick: () -> Unit) {
