@@ -72,24 +72,6 @@ private fun AllSpeciesScreenContent(
         Log.d("🐱AllSpecies", "AllSpeciesScreenContent: scroll = $listState")
     }
 
-//    Scaffold { padding ->
-//        contentWindowInsets = WindowInsets(0),
-//
-//        TopAppBar(
-//            title = { Text("All Species") },
-//            actions = {
-//                IconButton(onClick = { onStartQuizClick("quiz") }) {
-//                    Icon(Icons.Default.Quiz, contentDescription = "Kviz znanja")
-//                }
-//            }
-//        )
-//
-//        Box(
-//            Modifier
-//                .fillMaxSize()
-//                .padding(padding)
-//        )
-
     Scaffold(
         // turn off the default status-bar/nav-bar padding
         contentWindowInsets = WindowInsets(0),
@@ -234,9 +216,7 @@ private fun AllSpeciesScreenContent(
                             }
                         }
                     }
-
                 }
-
             }
-        }
+    }
 }

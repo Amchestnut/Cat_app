@@ -57,6 +57,8 @@ import com.example.cat_app.features.splash_screen.SplashScreen
 import com.example.cat_app.features.splash_screen.SplashViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navigation
+import com.example.cat_app.features.profile.ui.EditProfileScreen
+import com.example.cat_app.features.profile.ui.ProfileScreen
 
 
 // Bottom bar destinations
@@ -350,30 +352,30 @@ fun LeaderboardScreen() {
     }
 }
 
-@Composable
-fun ProfileScreen(onEditClick: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-    ) {
-        Text("Profile")
-        Button(onClick = onEditClick) {
-            Text("Edit Profile")
-        }
-    }
-}
-
-@Composable
-fun EditProfileScreen(onClose: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-    ) {
-        Text("Edit Profile")
-        Button(onClick = onClose) {
-            Text("Back")
-        }
-    }
-}
+//@Composable
+//fun ProfileScreen(onEditClick: () -> Unit) {
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+//    ) {
+//        Text("Profile")
+//        Button(onClick = onEditClick) {
+//            Text("Edit Profile")
+//        }
+//    }
+//}
+//
+//@Composable
+//fun EditProfileScreen(onClose: () -> Unit) {
+//    Column(
+//        modifier = Modifier.fillMaxSize(),
+//        horizontalAlignment = Alignment.CenterHorizontally,
+//        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
+//    ) {
+//        Text("Edit Profile")
+//        Button(onClick = onClose) {
+//            Text("Back")
+//        }
+//    }
+//}
