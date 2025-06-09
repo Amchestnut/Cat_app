@@ -189,9 +189,6 @@ fun BottomNavigation() {
                         onDetailInformationClick = { id ->
                             navController.navigate("details/$id")
                         },
-                        onStartQuizClick = {
-                            navController.navigate(BottomNavScreen.Quiz.route)
-                        }
                     )
                 }
 

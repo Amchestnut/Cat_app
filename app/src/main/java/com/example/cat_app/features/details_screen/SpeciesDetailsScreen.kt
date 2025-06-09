@@ -65,13 +65,12 @@ fun SpeciesDetailsScreen(
         }
         state.breed != null -> SpeciesDetailsScreen(
             state = state,
-            eventPublisher = viewModel::setEvent,
+            eventPublisher = viewModel::setEvent,       // wrapper, da ne bi pisali npr: "onClick = { viewModel.setEvent(MyUiEvent.ButtonClicked) }"   nego "onClick = { eventPublisher(MyUiEvent.ButtonClicked) }",      nista spec, referenca na funkciju
             breed = state.breed,
             onClose = onClose,
             onGalleryClick = onGalleryClick,
         )
     }
-
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -230,7 +229,7 @@ private fun SpeciesDetailsScreen(
 
                 Spacer(Modifier.height(16.dp))
 
-                // Five behavior/needs widgets
+                // I need 5 behaviours, but 6 will also do
                 BreedStats(breed)
 
                 Spacer(Modifier.height(16.dp))

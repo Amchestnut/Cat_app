@@ -16,8 +16,11 @@ import javax.inject.Inject
 import com.example.cat_app.features.details_screen.SpeciesDetailsScreenContract.UiEvent
 import com.example.cat_app.features.details_screen.SpeciesDetailsScreenContract.UiState
 import com.example.cat_app.features.details_screen.SpeciesDetailsScreenContract.SideEffect
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.update
 
 
 @HiltViewModel
@@ -44,52 +47,43 @@ class SpeciesDetailsViewModel @Inject constructor(
         _effect.send(effect)
     }
 
-
+    // MVI funkcionise tako sto VIEW samo INTENT kad koristik nesto uradi, a VIEWMODEL reaguje na state flow iz modela, BEZ VLASTITOG HARDKODIRANJA inicijalnih dogadjaja
     init {
-        observeEvents()
+        observeEvents()     // mada nam ovo ne treba, jer mi nemamo nikakav EVENT u ovom prostom ekranu
 
-        setEvent(UiEvent.LoadDetails(breedId))      // Prilikom ucitava DETAILS ekrana, prvi event koji imam je da popunim trenutni STATE da sada imam ovu macku ID ucitanu. Bez nje, nemam sta da ucitavam...
+        loadFromDatabase()
     }
+
+
+    private fun loadFromDatabase() {
+        viewModelScope.launch {
+            allSpeciesRepository
+                .observeBreed(breedId)
+                .filterNotNull()
+                // ovaj collect je MNOGO BITAN.
+                // Ovde se pretplatimo na flow, i collect{...} ce da mi drzi pretplatu STALNO AKTIVNOM
+                // svaki put kada se u bazi promeni red sa ovim ID-jem,
+                // ROOM ponovo izvrsava upit i emituje novi BREED ENTITY, (pa se desava mapiranje, pa dobijam flow<Breed?>) a moja korutina ga hvata i mapira u UI state
+                .collect { breed ->
+                    _state.update { ui ->       // composable koji posmatra ovaj state ce se automatski rerenderovati kad se ovaj UiState promeni
+                        ui.copy(
+                            loading = false,
+                            error = null,
+                            breed = breed
+                        )
+                    }
+                }
+                // ova linija bkv nece nikad biti dohvacena, jer collect NE ZAVRSAVA
+                // jedino da smo uradili .first(), onda bi se zavrsilo (ali ovo je collect), ili da smo take take(1).collect{...}
+                /// BITNO:
+                // ROOM-ov DAO FLOW je cold (prekida se kada ga niko ne kolektuje), ali je INFINITE, dakle:
+                // collect{..} traje sve dok ga ne cancel-ujem
+        }
+    }
+
+    // bitna razlika u kotlinu je FIRST() i COLLECT {} nad jednim hot flow
 
     private fun observeEvents() {
-        viewModelScope.launch {
-            events.collect { event ->
-                when (event) {
-                    // moram da stavim ovo "IS" zbog casting-a, jer ja imam data klasu, a u profinom primeru smo imali "data object"
-                    is UiEvent.LoadDetails -> loadDetails(breedId)
-                }
-            }
-        }
+
     }
-
-
-    private fun loadDetails(id: String) = viewModelScope.launch {
-        setState {
-            copy(loading = true, error = null)
-        }
-
-        try {
-            // u repo‑u u praksi su ti svi podaci već kesirani
-
-            // OLD
-//            val all = allSpeciesRepository.observeAllSpecies()
-//            val b = all.fir { it.id == id }
-//                ?: throw IllegalArgumentException("Breed $id not found")
-
-            val breed = allSpeciesRepository
-                .observeBreed(id)
-                .first()                 // suspend: uzmi prvu emisiju
-                ?: throw IllegalArgumentException("Breed $id not found")
-
-            setState {
-                copy(loading = false, breed = breed)
-            }
-        }
-        catch (t: Throwable) {
-            setState {
-                copy(loading = false, error = t)
-            }
-        }
-    }
-
 }

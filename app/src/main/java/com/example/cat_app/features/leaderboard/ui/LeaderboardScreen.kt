@@ -45,7 +45,6 @@ import com.example.cat_app.core.ui.theme.SuccessGreen
 import com.example.cat_app.features.leaderboard.ui.LeaderboardContract.LeaderboardItem
 
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LeaderboardScreen(

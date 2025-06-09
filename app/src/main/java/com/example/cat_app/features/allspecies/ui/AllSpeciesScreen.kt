@@ -14,6 +14,8 @@ import androidx.compose.material.icons.filled.Quiz
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.material3.ScaffoldDefaults.contentWindowInsets
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -28,12 +30,11 @@ import coil3.compose.AsyncImage
 import com.example.cat_app.R
 import com.example.cat_app.features.allspecies.domain.Breed
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun AllSpeciesScreen(
     viewModel: AllSpeciesViewModel = hiltViewModel(),       // Hilt ubacuje ViewModel
     onDetailInformationClick: (String) -> Unit,             // sad id tipično String
-    onStartQuizClick: (String) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -46,7 +47,9 @@ fun AllSpeciesScreen(
         },
         breeds      = uiState.filteredBreeds,
         onDetailInformationClick = onDetailInformationClick,
-        onStartQuizClick = onStartQuizClick,
+        onRefresh = {
+            viewModel.setEvent(AllSpeciesScreenContract.UiEvent.LoadBreeds)
+        }
     )
 }
 
@@ -59,7 +62,7 @@ private fun AllSpeciesScreenContent(
     onSearchChange: (String) -> Unit,
     breeds: List<Breed>,
     onDetailInformationClick: (String) -> Unit,
-    onStartQuizClick: (String) -> Unit,
+    onRefresh: () -> Unit,
 )
 {
     val listState = rememberSaveable(
@@ -67,6 +70,11 @@ private fun AllSpeciesScreenContent(
     ) {
         LazyListState()
     }
+
+//    val pullState = rememberPullToRefreshState(
+//        refreshing = loading,
+//        onRefresh = onRefresh
+//    )
 
     LaunchedEffect(Unit) {
         Log.d("🐱AllSpecies", "AllSpeciesScreenContent: scroll = $listState")
@@ -102,7 +110,7 @@ private fun AllSpeciesScreenContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)           // <— gives it a defined height
+                        .weight(1f)           //  gives it a defined height
                 ) {
                     Image(
                         painter = painterResource(R.drawable.my_wallpaper),
@@ -111,111 +119,124 @@ private fun AllSpeciesScreenContent(
                         modifier = Modifier.matchParentSize()
                     )
 
-                    when {
-                        loading -> {
-                            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                                CircularProgressIndicator()
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+//                            .pullToRefresh(pullState)
+                    ) {
+                        when {
+                            loading -> {
+                                Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                    CircularProgressIndicator()
+                                }
                             }
-                        }
-                        error != null -> {
-                            Box(Modifier.fillMaxSize(), Alignment.Center) {
-                                Text("Error: ${error.message}")
+                            error != null -> {
+                                Box(Modifier.fillMaxSize(), Alignment.Center) {
+                                    Text("Error: ${error.message}")
+                                }
                             }
-                        }
-                        else -> {
-                            LazyColumn(
-                                state = listState,
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(horizontal = 16.dp)
-                            ) {
-                                items(breeds) { breed ->
-                                    Card(
-                                        onClick = { onDetailInformationClick(breed.id) },
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 6.dp),
-                                        colors = CardDefaults.cardColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                                        ),
-                                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                        shape = RoundedCornerShape(12.dp)
-                                    ) {
-                                        ListItem(
-                                            leadingContent = {
-                                                AsyncImage(
-                                                    model = breed.imageUrl,
-                                                    contentDescription = breed.name,
-                                                    modifier = Modifier
-                                                        .size(64.dp)
-                                                        .clip(RoundedCornerShape(8.dp))
-                                                )
-                                            },
-                                            headlineContent = {
-                                                Text(
-                                                    breed.name,
-                                                    style = MaterialTheme.typography.titleMedium
-                                                )
-                                            },
-                                            supportingContent = {
-                                                Column(Modifier.fillMaxWidth()) {
-                                                    // alt‐names or fallback
-                                                    val altText = breed.altNames
-                                                        ?.takeIf { it.isNotBlank() }
-                                                        ?: "no alternative names"
-                                                    Text(
-                                                        "Alt: $altText",
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                        maxLines = 1, overflow = TextOverflow.Ellipsis
+                            else -> {
+                                LazyColumn(
+                                    state = listState,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 16.dp)
+                                ) {
+                                    items(breeds) { breed ->
+                                        Card(
+                                            onClick = { onDetailInformationClick(breed.id) },
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 6.dp),
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                            ),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                            shape = RoundedCornerShape(12.dp)
+                                        ) {
+                                            ListItem(
+                                                leadingContent = {
+                                                    AsyncImage(
+                                                        model = breed.imageUrl,
+                                                        contentDescription = breed.name,
+                                                        modifier = Modifier
+                                                            .size(64.dp)
+                                                            .clip(RoundedCornerShape(8.dp))
                                                     )
-
-                                                    // truncated description
-                                                    breed.description?.let { desc ->
-                                                        val truncated = desc.takeIf { it.length <= 250 }
-                                                            ?: desc.take(250) + "…"
+                                                },
+                                                headlineContent = {
+                                                    Text(
+                                                        breed.name,
+                                                        style = MaterialTheme.typography.titleMedium
+                                                    )
+                                                },
+                                                supportingContent = {
+                                                    Column(Modifier.fillMaxWidth()) {
+                                                        // alt‐names or fallback
+                                                        val altText = breed.altNames
+                                                            ?.takeIf { it.isNotBlank() }
+                                                            ?: "no alternative names"
                                                         Text(
-                                                            truncated,
-                                                            style = MaterialTheme.typography.bodyMedium,
-                                                            modifier = Modifier.padding(top = 4.dp),
-                                                            maxLines = 3, overflow = TextOverflow.Ellipsis
+                                                            "Alt: $altText",
+                                                            style = MaterialTheme.typography.bodySmall,
+                                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                            maxLines = 1, overflow = TextOverflow.Ellipsis
                                                         )
-                                                    }
 
-                                                    // temperament chips
-                                                    breed.temperament
-                                                        ?.split(',')
-                                                        ?.map { it.trim() }
-                                                        ?.take(5)
-                                                        ?.takeIf { it.isNotEmpty() }
-                                                        ?.let { traits ->
-                                                            Row(
-                                                                Modifier
-                                                                    .horizontalScroll(rememberScrollState())
-                                                                    .padding(top = 8.dp),
-                                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                                            ) {
-                                                                traits.forEach { trait ->
-                                                                    AssistChip(
-                                                                        onClick = { /* maybe filter later */ },
-                                                                        label = { Text(trait) },
-                                                                        colors = AssistChipDefaults.assistChipColors(
-                                                                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                                                            labelColor     = MaterialTheme.colorScheme.onPrimaryContainer
-                                                                        ),
-                                                                        modifier = Modifier.defaultMinSize(minHeight = 28.dp)
-                                                                    )
+                                                        // truncated description
+                                                        breed.description?.let { desc ->
+                                                            val truncated = desc.takeIf { it.length <= 250 }
+                                                                ?: desc.take(250) + "…"
+                                                            Text(
+                                                                truncated,
+                                                                style = MaterialTheme.typography.bodyMedium,
+                                                                modifier = Modifier.padding(top = 4.dp),
+                                                                maxLines = 3, overflow = TextOverflow.Ellipsis
+                                                            )
+                                                        }
+
+                                                        // temperament chips
+                                                        breed.temperament
+                                                            ?.split(',')
+                                                            ?.map { it.trim() }
+                                                            ?.take(5)
+                                                            ?.takeIf { it.isNotEmpty() }
+                                                            ?.let { traits ->
+                                                                Row(
+                                                                    Modifier
+                                                                        .horizontalScroll(rememberScrollState())
+                                                                        .padding(top = 8.dp),
+                                                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                                                ) {
+                                                                    traits.forEach { trait ->
+                                                                        AssistChip(
+                                                                            onClick = { /* maybe filter later */ },
+                                                                            label = { Text(trait) },
+                                                                            colors = AssistChipDefaults.assistChipColors(
+                                                                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                                                                labelColor     = MaterialTheme.colorScheme.onPrimaryContainer
+                                                                            ),
+                                                                            modifier = Modifier.defaultMinSize(minHeight = 28.dp)
+                                                                        )
+                                                                    }
                                                                 }
                                                             }
-                                                        }
+                                                    }
                                                 }
-                                            }
-                                        )
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
+
+//                        PullRefreshIndicator(
+//                            refreshing = loading,
+//                            state = pullState,
+//                            modifier = Modifier.align(Alignment.TopCenter)
+//                        )
                     }
+
                 }
             }
     }

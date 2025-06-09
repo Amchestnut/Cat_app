@@ -28,9 +28,11 @@ class BreedRepository @Inject constructor(
         }
     }
 
+    // tldr: primim BreedEntity?, mapiram u Breed?, vratim Flow<Breed?>, koji je isto COLD, ali u vidu DOMENA
+    // pretplacujem se na room DAO, koji vraca FLOW<BreedEntity>, i emitujem SVAKI PUT KADA se taj red u bazi PROMENI
     override fun observeBreed(id: String): Flow<Breed?> =
         dao.observeById(id)
-            .map { it?.toDomain() }
+            .map { it?.toDomain() }    // mapiram dobijeni BREED ENTITY u BREED DOMAIN
 
 
     // refresh, mozda nekad bude zatrebao

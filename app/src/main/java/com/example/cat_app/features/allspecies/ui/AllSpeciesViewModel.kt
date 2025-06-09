@@ -41,7 +41,7 @@ class AllSpeciesViewModel @Inject constructor(
     }
 
 
-    // side effects, mada ih mi ovde u all species generalno nemamo?
+    // side effects, mada ih mi ovde u all_species generalno nemamo? ali da imamo ja bi ovo ovako radio
     private val _effect: Channel<SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()
     private fun setEffect(effect: SideEffect) {
@@ -50,12 +50,10 @@ class AllSpeciesViewModel @Inject constructor(
         }
     }
 
-
     init {
-        Log.d("AllSpeciesVM", "init: line before observeEvents()")
         observeEvents()
-        Log.d("AllSpeciesVM", "init: line before setEvent()")
-        setEvent(UiEvent.LoadBreeds)
+
+        setEvent(UiEvent.LoadBreeds)    // zelimo da se macke ucitaju samo kad se napravi ovaj viewmodel, a ne kad se napravi ekran (zbog rekompozicije, ne zelimo da zovemo API za ucitavanje svih macaka svaki put kad udjemo na ALL_SPECIES ekran, nego samo 1)
     }
 
     private fun observeEvents() = viewModelScope.launch {
@@ -63,15 +61,18 @@ class AllSpeciesViewModel @Inject constructor(
         events.collect { event ->
             Log.d(TAG, "observeEvents: got event = $event")
             when (event) {
-                UiEvent.LoadBreeds -> loadBreeds()
+                is UiEvent.LoadBreeds -> loadBreeds()
                 is UiEvent.SearchQueryChanged -> applySearch(event.query)
             }
         }
     }
 
+
     private fun loadBreeds() = viewModelScope.launch {
         // 1) loading = true
-        setState { copy(loading = true, error = null) }
+        setState {
+            copy(loading = true, error = null)
+        }
 
         // 2) osvezim bazu sa mreze, ucitam ponovo sa API-ja
         runCatching { allSpeciesRepository.refreshAllSpecies() }
@@ -80,17 +81,18 @@ class AllSpeciesViewModel @Inject constructor(
             }
 
         // 3) kolektuj iz baze
-        allSpeciesRepository.observeAllSpecies().collect { list ->
-            setState {
-                val filtered = if (searchQuery.isBlank()) list else list.filter {
-                    it.name.contains(searchQuery, ignoreCase = true)
+        allSpeciesRepository.observeAllSpecies()
+            .collect { list ->
+                setState {
+                    val filtered = if (searchQuery.isBlank()) list else list.filter {
+                        it.name.contains(searchQuery, ignoreCase = true)
+                    }
+                    copy(
+                        loading        = false,
+                        allBreeds      = list,
+                        filteredBreeds = filtered
+                    )
                 }
-                copy(
-                    loading        = false,
-                    allBreeds      = list,
-                    filteredBreeds = filtered
-                )
-            }
         }
     }
 
