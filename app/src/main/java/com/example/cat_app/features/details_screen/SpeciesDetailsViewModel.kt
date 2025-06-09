@@ -75,6 +75,7 @@ class SpeciesDetailsViewModel @Inject constructor(
                 }
                 // ova linija bkv nece nikad biti dohvacena, jer collect NE ZAVRSAVA
                 // jedino da smo uradili .first(), onda bi se zavrsilo (ali ovo je collect), ili da smo take take(1).collect{...}
+
                 /// BITNO:
                 // ROOM-ov DAO FLOW je cold (prekida se kada ga niko ne kolektuje), ali je INFINITE, dakle:
                 // collect{..} traje sve dok ga ne cancel-ujem
@@ -83,7 +84,9 @@ class SpeciesDetailsViewModel @Inject constructor(
 
     // bitna razlika u kotlinu je FIRST() i COLLECT {} nad jednim hot flow
 
-    private fun observeEvents() {
-
+    private fun observeEvents() = viewModelScope.launch{
+        events.collect {
+            // On this screen - literally nothing to collect
+        }
     }
 }

@@ -58,6 +58,7 @@ class AllSpeciesViewModel @Inject constructor(
 
     private fun observeEvents() = viewModelScope.launch {
         Log.d(TAG, "observeEvents: collecting events")
+
         events.collect { event ->
             Log.d(TAG, "observeEvents: got event = $event")
             when (event) {

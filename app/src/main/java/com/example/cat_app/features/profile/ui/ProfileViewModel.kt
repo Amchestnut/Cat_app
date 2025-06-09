@@ -59,7 +59,7 @@ class ProfileViewModel @Inject constructor(
 
     fun setEvent(event: UiEvent) {
         when (event) {
-            UiEvent.LoadProfile -> { /* already loaded in init */ }
+            UiEvent.LoadProfile -> { /* already loaded (in viewmodel init) */ }
             is UiEvent.SaveProfile -> saveProfile(event)
         }
     }

@@ -32,13 +32,25 @@ fun QuizResultScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text("Your score:", style = MaterialTheme.typography.titleLarge)
-        Text("$score / ${QUESTIONS_PER_GAME * 5}", style = MaterialTheme.typography.displayMedium)
+        Text(
+            "Your score:",
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            "$score / ${QUESTIONS_PER_GAME * 5}"
+            , style = MaterialTheme.typography.displayMedium
+        )
+
         Spacer(Modifier.height(24.dp))
+
         Button(onClick = onShare, enabled = !ui.posting) {
             Text("Share to Leaderboard")
         }
+
         Spacer(Modifier.height(8.dp))
-        OutlinedButton(onClick = onClose) { Text("Done") }
+
+        OutlinedButton(onClick = onClose) {
+            Text("Done")
+        }
     }
 }

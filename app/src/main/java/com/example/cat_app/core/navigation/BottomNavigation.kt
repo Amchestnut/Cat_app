@@ -201,10 +201,11 @@ fun BottomNavigation() {
                         val parent = remember(entry) { navController.getBackStackEntry(BottomNavScreen.Quiz.route) }
                         val vm = hiltViewModel<QuizViewModel>(parent)
 
-                        QuizIntroScreen(onStart = {
-                            vm.setEvent(QuizScreenContract.UiEvent.LoadQuiz)
-                            navController.navigate("quiz/questions")
-                        })
+                        QuizIntroScreen(
+                            onStart = {
+                                vm.setEvent(QuizScreenContract.UiEvent.LoadQuiz)
+                                navController.navigate("quiz/questions")
+                            })
                     }
 
                     composable("quiz/questions") { entry ->

@@ -16,6 +16,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
@@ -27,41 +28,57 @@ class QuizViewModel @Inject constructor(
     private val repo: QuizRepository,
     private val quizResultRepository: QuizResultRepository
 ): ViewModel() {
-
-    val TAG = "QuizViewModel"
+    val TAG = "QuizViewModel"       // za loggere
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
-
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(e: UiEvent) = viewModelScope.launch {
-        when (e) {
-            UiEvent.LoadQuiz -> load()
-            is UiEvent.AnswerChosen -> answer(e.answer)
-            UiEvent.Tick -> tick()
-            UiEvent.CancelPressed -> _effect.send(
-                SideEffect.ShowCancelDialog { hardCancel() }
-            )
-            UiEvent.TimeUp -> finish()
-            UiEvent.SharePressed -> share()
-        }
+        events.emit(e)
     }
+//    fun setEvent(e: UiEvent) = viewModelScope.launch {
+//        when (e) {
+//            UiEvent.LoadQuiz -> load()
+//            is UiEvent.AnswerChosen -> answer(e.answer)
+//            UiEvent.Tick -> tick()
+//            UiEvent.CancelPressed -> _effect.send(
+//                SideEffect.ShowCancelDialog { hardCancel() }
+//            )
+//            UiEvent.TimeUp -> finish()
+//            UiEvent.SharePressed -> share()
+//        }
+//    }
 
     private val _effect = Channel<SideEffect>()
     val effect = _effect.receiveAsFlow()
 
     private var timerJob: Job? = null
 
-    // START, load sva pitanja, pripremi ih za pravi kviz
-    // TODO: da li ovo odmah ili kad kliknem start?
+
     init {
         Log.d(TAG, "Initializing ViewModel, loading quiz…")
+        observeEvents()
 //        setEvent(UiEvent.LoadQuiz)    posto prvo pozivam "Intro screen", ne treba mi ovde load quiz, vec se poziva load quiz kada predjemo na QUESTIONS screen
     }
 
-    // ovo moze i sa runCatching, mada je on isti kao try and catch
+    private fun observeEvents() = viewModelScope.launch{
+        events.collect{ event ->
+            when(event) {
+                is UiEvent.LoadQuiz -> load()
+                is UiEvent.AnswerChosen -> answer(event.answer)
+                is UiEvent.Tick -> tick()
+                is  UiEvent.CancelPressed -> _effect.send(
+                    SideEffect.ShowCancelDialog { hardCancel() }
+                )
+                is UiEvent.TimeUp -> finish()
+                is UiEvent.SharePressed -> share()
+            }
+        }
+    }
+
+
     private suspend fun load() {
         Log.d(TAG, "Calling repo.generateQuiz()")
         try {
@@ -69,7 +86,6 @@ class QuizViewModel @Inject constructor(
             Log.d(TAG, "Loaded ${questions.size} questions: $questions")
             setState { copy(questions = questions) }
 //            setState { copy(questions = questions, answers = List(questions.size) { null }, currentIdx = 0, finished = false, remainingMillis = TOTAL_TIME_MS) }
-
             startTimer()
         }
         catch (err: Throwable) {

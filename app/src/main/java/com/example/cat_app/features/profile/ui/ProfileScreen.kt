@@ -48,7 +48,7 @@ fun ProfileScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // — statični zaglavni deo —
+            // top deo
             Text(
                 text = "My Profile",
                 style = MaterialTheme.typography.headlineMedium,
@@ -84,10 +84,10 @@ fun ProfileScreen(
             Text("Quiz history", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
 
-            // — skrolovani deo: samo istorija —
+            // Skrol deo: istorija svih pokusaja
             LazyColumn(
                 modifier = Modifier
-                    .weight(1f)           // zauzima preostali prostor
+                    .weight(1f)           // zauzima preostali prostor (fiksno zauzima ceo deo za istoriju, pa je tek na kraju dole na istom mestu -> button)
                     .fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
@@ -135,7 +135,8 @@ fun EditProfileScreen(
     var nickname by rememberSaveable { mutableStateOf(state.nickname) }
     var email    by rememberSaveable { mutableStateOf(state.email) }
 
-    // listen for "ProfileSaved" effect to pop back
+    //  TODO: sve novo za edit profile, i da izvuce data i da ga stvarno menja. (ako je moguce i nickname, za kviz)
+    // listen for "ProfileSaved" effect, to pop back
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->
             if (effect is SideEffect.ProfileSaved) {
@@ -202,12 +203,10 @@ fun EditProfileScreen(
 }
 
 
-// ispod svih importova:
-
 @Composable
 private fun HistoryRow(
     index: Int,
-    item: QuizResultEntity  // import: com.example.cat_app.features.quiz.data.local.QuizResultEntity
+    item: QuizResultEntity
 ) {
     Card(
         colors = CardDefaults.cardColors(containerColor = CatBeige),

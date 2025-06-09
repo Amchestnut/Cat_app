@@ -14,6 +14,8 @@ val CatBeige       = Color(0xFFF5F5DC)
 val CatBrown       = Color(0xFFA67B5B)
 val CatWhite       = Color(0xFFFFFFFF)
 
+val CatBorder      = Color(0xFFD49041)
+
 val ScoreYellow    = Color(0xFFFFC107)
 val SuccessGreen   = Color(0xFF4CAF50)
 val BadgeGreen     = Color(0xFF81C784)
