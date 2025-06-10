@@ -38,29 +38,17 @@ class QuizViewModel @Inject constructor(
     fun setEvent(e: UiEvent) = viewModelScope.launch {
         events.emit(e)
     }
-//    fun setEvent(e: UiEvent) = viewModelScope.launch {
-//        when (e) {
-//            UiEvent.LoadQuiz -> load()
-//            is UiEvent.AnswerChosen -> answer(e.answer)
-//            UiEvent.Tick -> tick()
-//            UiEvent.CancelPressed -> _effect.send(
-//                SideEffect.ShowCancelDialog { hardCancel() }
-//            )
-//            UiEvent.TimeUp -> finish()
-//            UiEvent.SharePressed -> share()
-//        }
-//    }
 
     private val _effect = Channel<SideEffect>()
     val effect = _effect.receiveAsFlow()
 
+    // job za timer, cuvam ga da bi mogao da cancel-ujem ako zavrsimo ili ako kliknemo cancel
     private var timerJob: Job? = null
 
 
     init {
         Log.d(TAG, "Initializing ViewModel, loading quiz…")
         observeEvents()
-//        setEvent(UiEvent.LoadQuiz)    posto prvo pozivam "Intro screen", ne treba mi ovde load quiz, vec se poziva load quiz kada predjemo na QUESTIONS screen
     }
 
     private fun observeEvents() = viewModelScope.launch{
@@ -79,13 +67,20 @@ class QuizViewModel @Inject constructor(
     }
 
 
+    /**
+     load():
+     - suspend funkcija koja poziva repo.generateQuiz()
+     - u slučaju uspeha postavlja lista pitanja u state
+     - pokreće timer
+     - u slučaju greške hvata izuzetak i beleži u state.error
+     */
     private suspend fun load() {
         Log.d(TAG, "Calling repo.generateQuiz()")
         try {
             val questions = repo.generateQuiz()
             Log.d(TAG, "Loaded ${questions.size} questions: $questions")
+
             setState { copy(questions = questions) }
-//            setState { copy(questions = questions, answers = List(questions.size) { null }, currentIdx = 0, finished = false, remainingMillis = TOTAL_TIME_MS) }
             startTimer()
         }
         catch (err: Throwable) {
@@ -94,6 +89,15 @@ class QuizViewModel @Inject constructor(
         }
     }
 
+    /**
+     * answer(value):
+     * - ne radi ništa ako je quiz već završen
+     * - izračuna broj poena za trenutni odgovor
+     * - napuni answers listu, inkrementuje currentIdx
+     * - ako smo došli do kraja, poziva finish()
+     *
+     * Ovde mogu da dodam  UI efekat (pucanje konfete) slanjem SideEffect.
+     */
     private fun answer(value: Any) {
         val s = _state.value
         if (s.finished){
@@ -101,36 +105,47 @@ class QuizViewModel @Inject constructor(
             return
         }
 
-        val curr_question = s.questions.getOrNull(s.currentIdx)
-        Log.d(TAG, "Answering question #${s.currentIdx + 1}: $curr_question")
+        val currentQuestion = s.questions.getOrNull(s.currentIdx)
+        Log.d(TAG, "Answering question #${s.currentIdx + 1}: $currentQuestion")
         Log.d(TAG, "User chose: $value")
 
-        val pts = s.questions[s.currentIdx].score(value.toString())
+        val points = s.questions[s.currentIdx].score(value.toString())
         setState {
+            val newAnswers = answers.toMutableList().also { it[currentIdx] = points }
+            // uradicemo ovo direktno ovde, a ne pomocu neke pomocne funkcije
+            val newTotal   = newAnswers.filterNotNull().sum()
             copy(
-                answers = answers.toMutableList().also { it[currentIdx] = pts },
-                currentIdx = currentIdx + 1,
-                finished = currentIdx + 1 == questions.size
+                answers    = newAnswers,
+                currentIdx = currentIdx + 1,                    // inkrementujemo pitanje na sledece
+                finished = currentIdx + 1 == questions.size,     // prost boolean, jel smo dosli do kraja?
+                totalScore = newTotal,
             )
         }
 
-        // samo za logovanje
+
+        // samo za LOGCAT
         val newState = _state.value
         Log.d(TAG, "New state → currentIdx=${newState.currentIdx}, answers=${newState.answers}, finished=${newState.finished}")
 
-
+        // ako smo zavrsili, promenili smo bili finished FALSE -> TRUE, i okinucemo ovaj finish()
         if (_state.value.finished) {
             Log.d(TAG, "All questions answered, finishing quiz…")
-            finish()
+            finish()   // mogli smo i da wrappujemo u event
         }
     }
 
+
+    /**
+     * startTimer():
+     * - cancel-uje postojeći timerJob ako postoji
+     * - pokreće novi coroutine koji svakih 1s emituje UiEvent.Tick
+     */
     private fun startTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             while (isActive) {
                 delay(1_000)
-                setEvent(UiEvent.Tick)
+                setEvent(UiEvent.Tick)      // smanji tajmer za 1s
             }
         }
     }
@@ -145,17 +160,24 @@ class QuizViewModel @Inject constructor(
         }
     }
 
+    /**
+     * finish():
+     * - čuva rezultat lokalno (quizResultRepository.saveLocal)
+     * - cancel-uje timerJob
+     * - šalje SideEffect.NavigateToResult da UI zatvori screen
+     *
+     * Savrseno vreme za ubacivanje neke animacije
+     */
     private fun finish() {
         Log.d(TAG, "finish(): local save done, now navigating to result")
         viewModelScope.launch {
-            quizResultRepository.saveLocal(totalScore().toDouble())
+            val total = state.value.totalScore
+            quizResultRepository.saveLocal(total.toDouble())
         }
 
         Log.d(TAG, "finish() called, sending NavigateToResult")
         timerJob?.cancel()
         _effect.trySend(SideEffect.NavigateToResult)
-
-
     }
 
     private fun hardCancel() {
@@ -165,12 +187,29 @@ class QuizViewModel @Inject constructor(
         }
     }
 
+
+    /**
+     * share():
+     * - postavlja posting = true u state (da UI može da prikaže loader)
+     * - poziva repo.postScore(totalScore())
+     * - pri uspehu emituje SideEffect.ScoreShared
+     * - pri grešci upisuje err u state.error
+     * - na kraju resetuje posting = false
+     *
+     * Ovde bi bilo kul da dodam neku animaciju
+     */
     private fun share() = viewModelScope.launch {
         setState { copy(posting = true) }
         kotlin.runCatching {
-            repo.postScore(totalScore())
+            val total = state.value.totalScore
+            repo.postScore(total)
         }.onSuccess {
-            _effect.send(SideEffect.ScoreShared)
+            Log.d(TAG, "Score successfully shared to server!")
+            /*  ViewModel po pravilu MVI ne sme direktno da prikazuje snackbar, toast ili dialog, nego je ovo SIDE EFFECT, pa mozemo ovo da uhvatimo u UI i prikazemo
+                Takodje, bolje da koristim trySend nego send, jer viewmodel ce ostati blokiran ako UI trenutno ne slusa.  */
+
+            _effect.trySend(SideEffect.ScoreShared)
+
         }.onFailure { err ->
             setState { copy(error = err) }
         }.also {
@@ -178,5 +217,4 @@ class QuizViewModel @Inject constructor(
         }
     }
 
-    fun totalScore() = _state.value.answers.filterNotNull().sum()
 }

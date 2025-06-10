@@ -89,17 +89,7 @@ fun BottomNavigation() {
         navController.popBackStack()
     }
 
-    // Only show bottom bar on these routes (or any nested under "quiz")
-//    val showBottomBar = when {
-//        currentRoute == BottomNavScreen.AllSpecies.route                 -> true
-//        currentRoute?.startsWith(BottomNavScreen.Quiz.route) == true     -> true
-//        currentRoute == BottomNavScreen.Leaderboard.route                -> true
-//        currentRoute == BottomNavScreen.Profile.route                    -> true
-//        else                                                             -> false
-//    }
-
     val currentDest      = entries.value?.destination
-//    val parent           = currentDest?.parent
 
     val showBottomBar = when {
         /* case 1 – we are on one of the 4 tab routes */
@@ -215,16 +205,18 @@ fun BottomNavigation() {
                         // NEW: collect the "NavigateToResult" effect and actually push the result screen
                         LaunchedEffect(vm) {
                             vm.effect.collect { effect ->
-                                if (effect is QuizScreenContract.SideEffect.NavigateToResult) {
-                                    navController.navigate("quiz/result")
+                                when (effect) {
+                                    is QuizScreenContract.SideEffect.NavigateToResult -> navController.navigate("quiz/result")
+                                    else -> Unit
                                 }
+
                             }
                         }
 
                         QuizQuestionScreen(
                             viewModel = vm,
                             onExitQuiz = {
-                                // collapse the *entire* quiz graph & show Cats
+                                // destroy the entire quiz graph, and return to the main screen
                                 navController.navigate(BottomNavScreen.AllSpecies.route) {
                                     popUpTo(BottomNavScreen.Quiz.route) {
                                         inclusive = true
@@ -240,10 +232,10 @@ fun BottomNavigation() {
                         val vm = hiltViewModel<QuizViewModel>(parent)
 
                         QuizResultScreen(
+                            navController = navController,
                             viewModel = vm,
-
-                            onClose = {
-                                Log.d("NAV", "🎯 Done with quiz — popping it and going to Cats")
+                            onDoneClick = {
+                                Log.d("NAV", "from NAVIGATION: Done with quiz — popping it and going to Cats")
                                 navController.navigate(BottomNavScreen.AllSpecies.route) {
                                     // tear down the entire quiz subgraph
                                     popUpTo(BottomNavScreen.Quiz.route) {
@@ -252,7 +244,18 @@ fun BottomNavigation() {
                                     launchSingleTop = true
                                 }
                             },
-                            onShare = { vm.setEvent(QuizScreenContract.UiEvent.SharePressed) }
+                            onShare = {
+                                Log.d("NAV", "🎯 Shared the results with everyoneee")
+                                vm.setEvent(QuizScreenContract.UiEvent.SharePressed)
+
+//                                navController.navigate(BottomNavScreen.AllSpecies.route) {
+//                                    // tear down the entire quiz subgraph
+//                                    popUpTo(BottomNavScreen.Quiz.route) {
+//                                        inclusive = true
+//                                    }
+//                                    launchSingleTop = true
+//                                }
+                            }
                         )
                     }
                 }

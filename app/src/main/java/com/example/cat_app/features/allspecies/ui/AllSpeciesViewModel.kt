@@ -40,7 +40,6 @@ class AllSpeciesViewModel @Inject constructor(
         }
     }
 
-
     // side effects, mada ih mi ovde u all_species generalno nemamo? ali da imamo ja bi ovo ovako radio
     private val _effect: Channel<SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()

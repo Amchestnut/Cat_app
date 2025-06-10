@@ -30,35 +30,7 @@ object QuestionFactory {
             )
         }
 
-//        val originQuestions = shuffled.take(5).map { breed ->
-//            val wrong = breeds.asSequence()
-//                .mapNotNull { it.origin }
-//                .filterNot { it == breed.origin }
-//                .distinct()
-//                .shuffled(rng)
-//                .take(3)
-//                .toList()
-//            OriginQuestion(
-//                id = "org_${breed.id}",
-//                breedName = breed.name,
-//                choices   = (wrong + (breed.origin ?: "Unknown")).shuffled(rng),
-//                correctChoice = breed.origin ?: "Unknown"
-//            )
-//        }
-//
-//        val lifeSpanQuestions = shuffled.take(5).map { breed ->
-//            // Parse "12 - 15" → "12-15"
-//            val correct = breed.lifeSpan?.replace(" ", "") ?: "??"
-//            val wrong = generateWrongLifespans(correct).take(3)
-//            LifeSpanQuestion(
-//                id = "life_${breed.id}",
-//                breedName = breed.name,
-//                choices   = (wrong + correct).shuffled(rng),
-//                correctChoice = correct
-//            )
-//        }
-
-        // 2) Izbaci uljeza među temperamentima
+        // 2) Izbaci uljeza medju temperamentima
         val intruderQuestions = shuffled.map { breed ->
             // temperameni koje rasa ima
             val temps = breed.temperament
