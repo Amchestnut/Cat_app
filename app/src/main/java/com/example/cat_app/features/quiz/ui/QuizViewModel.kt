@@ -57,7 +57,7 @@ class QuizViewModel @Inject constructor(
                 is UiEvent.LoadQuiz -> load()
                 is UiEvent.AnswerChosen -> answer(event.answer)
                 is UiEvent.Tick -> tick()
-                is  UiEvent.CancelPressed -> _effect.send(
+                is UiEvent.CancelPressed -> _effect.send(
                     SideEffect.ShowCancelDialog { hardCancel() }
                 )
                 is UiEvent.TimeUp -> finish()
@@ -105,18 +105,23 @@ class QuizViewModel @Inject constructor(
             return
         }
 
-        val currentQuestion = s.questions.getOrNull(s.currentIdx)
-        Log.d(TAG, "Answering question #${s.currentIdx + 1}: $currentQuestion")
-        Log.d(TAG, "User chose: $value")
+        val currentQuestion = s.questions[s.currentIdx]
+        val selected       = value.toString()
+        val points         = currentQuestion.score(selected)    // metoda ".score()" proveri da li je odgovor tacan, i vrati 5 poena ako jeste, odnosno 0 ako je netacan
 
-        val points = s.questions[s.currentIdx].score(value.toString())
+//        val currentQuestion = s.questions.getOrNull(s.currentIdx)
+//        val points = s.questions[s.currentIdx].score(value.toString())      // direktno promenim skor pitanja u [5] ako je odgovor TACAN
+
+//        Log.d(TAG, "Answering question #${s.currentIdx + 1}: $currentQuestion")
+//        Log.d(TAG, "User chose: $value")
+
         setState {
             val newAnswers = answers.toMutableList().also { it[currentIdx] = points }
             // uradicemo ovo direktno ovde, a ne pomocu neke pomocne funkcije
             val newTotal   = newAnswers.filterNotNull().sum()
             copy(
                 answers    = newAnswers,
-                currentIdx = currentIdx + 1,                    // inkrementujemo pitanje na sledece
+                currentIdx = currentIdx + 1,                     // inkrementujemo pitanje na sledece
                 finished = currentIdx + 1 == questions.size,     // prost boolean, jel smo dosli do kraja?
                 totalScore = newTotal,
             )
@@ -216,5 +221,7 @@ class QuizViewModel @Inject constructor(
             setState { copy(posting = false) }
         }
     }
+
+
 
 }
