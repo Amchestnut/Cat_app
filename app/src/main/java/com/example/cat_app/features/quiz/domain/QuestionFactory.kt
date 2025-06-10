@@ -7,58 +7,68 @@ object QuestionFactory {
 
     // Returns 20 questions so ViewModel can use: shuffled().take(20)
     fun fromBreeds(breeds: List<Breed>): List<Question> {
-        if (breeds.size < 4)
+        val breedWithImages = breeds.filterNot { it.imageUrl.isNullOrBlank() }
+
+        if (breedWithImages.size < 4)
             return emptyList()
 
         val rng = Random(System.currentTimeMillis())
-        val shuffled = breeds.shuffled(rng)
+        val shuffledBreeds = breedWithImages.shuffled(rng)
 
         // 1) Koja je rasa macke sa slike?
-        val breedQuestions = shuffled.map { breed ->
+        val breedQuestions = shuffledBreeds.map { breed ->
             val wrong = breeds.filterNot { it.id == breed.id }
                 .shuffled(rng)
                 .take(3)
                 .map { it.name }
 
-            val choices = (wrong + breed.name).shuffled(rng)
+            val allChoices = (wrong + breed.name).shuffled(rng)
 
             ImageToNameQuestion(
                 id           = "breed_${breed.id}",
                 imageUrl     = breed.imageUrl ?: "",
-                choices      = choices,
+                choices      = allChoices,
                 correctChoice= breed.name
             )
         }
 
         // 2) Izbaci uljeza medju temperamentima
-        val intruderQuestions = shuffled.map { breed ->
-            // temperameni koje rasa ima
-            val temps = breed.temperament
+        val intruderQuestions = shuffledBreeds.map { breed ->
+            // temperameni koje ova rasa ima
+            val breedTemperament = breed.temperament
                 ?.split(",")
                 ?.map { it.trim() }
                 ?: emptyList()
 
-            // 3 nasumična iz pravih temperamenata
-            val actuals = temps.shuffled(rng).take(3)
-
             // svi ostali temperamenti iz drugih rasa
-            val others = breeds.flatMap {
+            val allOtherTemperaments = breeds.flatMap {
                 it.temperament
                     ?.split(",")
                     ?.map(String::trim)
                     ?: emptyList()
             }
                 .distinct()
-                .filterNot { temps.contains(it) }
+                .filterNot { breedTemperament.contains(it) }
 
-            // izabere jednog „uljeza“
-            val intruder = others.shuffled(rng).first()
-            val choices = (actuals + intruder).shuffled(rng)
+            // 3 nasumična temperamenta iz odabrane rase
+            val actuals = breedTemperament
+                .shuffled(rng)
+                .take(3)
+                .let { list ->
+                    if (list.size < 3)
+                        list + allOtherTemperaments.shuffled(rng).filterNot(list::contains).take(3 - list.size)
+                    else
+                        list
+                }
+
+            // 1 nasumican „uljez“ temperament
+            val intruder = allOtherTemperaments.shuffled(rng).first()
+            val finalChoices = (actuals + intruder).shuffled(rng)
 
             IntruderTemperamentQuestion(
                 id            = "temp_${breed.id}",
                 imageUrl      = breed.imageUrl ?: "",
-                choices       = choices,
+                choices       = finalChoices,
                 correctChoice = intruder
             )
         }
