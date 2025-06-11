@@ -73,7 +73,10 @@ fun ProfileScreen(
             Spacer(Modifier.height(24.dp))
 
             Card(
-                colors = CardDefaults.cardColors(containerColor = CatBeige),
+                colors = CardDefaults.cardColors(
+                    containerColor = CatBeige,
+                    contentColor   = Color.Black
+                ),
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(8.dp),
@@ -148,7 +151,10 @@ private fun HistoryRow(
     item: QuizResultEntity
 ) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = CatBeige),
+        colors = CardDefaults.cardColors(
+            containerColor = CatBeige,
+            contentColor   = Color.Black
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min),

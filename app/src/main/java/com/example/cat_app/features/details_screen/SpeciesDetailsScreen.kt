@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.example.cat_app.core.ui.theme.BadgeGreen
 import com.example.cat_app.core.ui.theme.ErrorRed600
 import com.example.cat_app.core.ui.theme.ScoreYellow
 import com.example.cat_app.core.ui.theme.SuccessGreen
@@ -256,7 +257,7 @@ private fun SpeciesDetailsScreen(
                     else {
                         Badge(
                             modifier = Modifier.padding(end = 8.dp),
-                            containerColor = ScoreYellow, // nice green
+                            containerColor = BadgeGreen, // nice green
                             contentColor   = Color.White
                         ) {
                             Text(

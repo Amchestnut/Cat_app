@@ -222,6 +222,7 @@ private fun PodiumItem(
                 .fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             color = CatWhite,
+            contentColor     = Color.Black,
             tonalElevation = 4.dp
         ) {
             Column(
@@ -284,7 +285,10 @@ private fun PodiumItem(
 private fun LeaderboardRow(item: LeaderboardItem) {
     Card(
         // bež kartica!!
-        colors = CardDefaults.cardColors(CatBeige),
+        colors = CardDefaults.cardColors(
+            containerColor = CatBeige,
+            contentColor   = Color.Black
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min),
