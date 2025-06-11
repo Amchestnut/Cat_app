@@ -127,7 +127,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
-
+    implementation("nl.dionsegijn:konfetti-compose:2.0.2")
 //    implementation(libs.androidx.compose.material)
 //    implementation("androidx.compose.material:material-pull-refresh")
 

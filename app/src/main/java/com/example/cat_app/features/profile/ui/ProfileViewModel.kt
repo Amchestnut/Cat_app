@@ -21,11 +21,30 @@ class ProfileViewModel @Inject constructor(
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(e : UiEvent){
+        viewModelScope.launch {
+            events.emit(e)
+        }
+    }
+
     private val _effect = Channel<SideEffect>(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
     init {
-        loadData()
+        observeEvents()
+
+    }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            events.collect { event ->
+                when(event){
+                    is UiEvent.LoadProfile -> loadData()
+                    else -> Unit
+                }
+            }
+        }
     }
 
     private fun loadData() {
@@ -57,13 +76,9 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun setEvent(event: UiEvent) {
-        when (event) {
-            UiEvent.LoadProfile -> { /* already loaded (in viewmodel init) */ }
-            is UiEvent.SaveProfile -> saveProfile(event)
-        }
-    }
 
+
+    // ovo je za edit
     private fun saveProfile(evt: UiEvent.SaveProfile) {
         viewModelScope.launch {
             userPrefs.saveUserProfile(evt.name, evt.nickname, evt.email)

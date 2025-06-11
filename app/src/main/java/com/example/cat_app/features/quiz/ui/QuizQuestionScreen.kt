@@ -72,11 +72,11 @@ fun QuizQuestionScreen(
     val context = LocalContext.current
 
     // --- Stanja za UI interakcije ---
-    var selectedChoice by remember { mutableStateOf<String?>(null) }
-    var isCorrect by remember { mutableStateOf<Boolean?>(null) }
+    var selectedChoice by rememberSaveable { mutableStateOf<String?>(null) }
+    var isCorrect by rememberSaveable { mutableStateOf<Boolean?>(null) }
 //    var buttonsEnabled by remember { mutableStateOf(true) }
-    var pendingChoice  by remember { mutableStateOf<String?>(null) }  // da bi buttoni imali vremena da se OBOJE
-    var isAnswered by remember { mutableStateOf(false) }
+    var pendingChoice  by rememberSaveable { mutableStateOf<String?>(null) }  // da bi buttoni imali vremena da se OBOJE
+    var isAnswered by rememberSaveable { mutableStateOf(false) }
 
     var showExitDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -94,14 +94,15 @@ fun QuizQuestionScreen(
     LaunchedEffect(ui.currentIdx) {
         selectedChoice = null
         isCorrect = null
-//        buttonsEnabled = true
         isAnswered = false
     }
 
     // da animacija ima vremena da se okine, da se vidi
+    // LaunchedEffect je helped koji iza scene otvara OWN CoroutineScope vezan za tu kompoziciju
+    // Sve sto napisem unutra je -> SUSPEND CONTEXT, pa delay() radi bez problema
     LaunchedEffect(pendingChoice) {
         pendingChoice?.let { choice ->
-            delay(1000L)
+            delay(100L)
             viewModel.setEvent(UiEvent.AnswerChosen(choice))
             pendingChoice = null
         }
@@ -254,15 +255,15 @@ fun QuizQuestionScreen(
                             containerColor         = buttonColor,
                             disabledContainerColor = buttonColor     // da zadrži boju i kad se onemogući
                         ),
-                        enabled = selectedChoice == null,            // posle prvog klika sve dugmiće gasimo
+                        enabled = selectedChoice == null,    // posle prvog klika, sve dugmiće onemogucavamo za klik
                         onClick = {
                             if (selectedChoice == null) {            // dozvoli klik samo prvi put
                                 selectedChoice = choice              // setuj odgovor
-//                                buttonsEnabled = false               // (više ti i ne treba)
                                 if (!isCorrectChoice)
                                     playSound()    // zvuk greške
 
-                                // odloži slanje u VM da animacija “pocrta” boje
+                                // odlozimo sve za 1s, da ima vremena da se prikaze animacija, u LE je korutina (neophodno)
+                                // zanimljivo, ne mogu ovde da uradim delay() u korutini, jer onClick {...} je NON-SUSPEND blok, a delay je SUSPEND, pa moze da radi samo unutar coroutine scope ili suspend konteksta
                                 pendingChoice = choice
                             }
                         }

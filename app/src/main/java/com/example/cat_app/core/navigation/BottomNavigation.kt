@@ -45,10 +45,11 @@ import com.example.cat_app.features.splash_screen.SplashScreen
 import com.example.cat_app.features.splash_screen.SplashViewModel
 import androidx.navigation.NavType
 import androidx.navigation.navigation
+import com.example.cat_app.features.edit_profile.EditProfileScreen
 import com.example.cat_app.features.leaderboard.ui.LeaderboardScreen
 import com.example.cat_app.features.leaderboard.ui.LeaderboardViewModel
-import com.example.cat_app.features.profile.ui.EditProfileScreen
 import com.example.cat_app.features.profile.ui.ProfileScreen
+import com.example.cat_app.features.profile.ui.ProfileViewModel
 
 
 // Bottom bar destinations
@@ -199,7 +200,6 @@ fun BottomNavigation() {
                                     is QuizScreenContract.SideEffect.NavigateToResult -> navController.navigate("quiz/result")
                                     else -> Unit
                                 }
-
                             }
                         }
 
@@ -259,9 +259,13 @@ fun BottomNavigation() {
                 }
 
                 composable(BottomNavScreen.Profile.route) {
-                    ProfileScreen(onEditClick = {
-                        navController.navigate("profile/edit")
-                    })
+                    val viewModel = hiltViewModel<ProfileViewModel>()
+                    ProfileScreen(
+                        viewModel = viewModel,
+                        onEditClick = {
+                            navController.navigate("profile/edit")
+                        }
+                    )
                 }
 
                 composable("profile/edit") {

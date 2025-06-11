@@ -40,15 +40,31 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    Scaffold { padding ->
+    LaunchedEffect (Unit) {
+        viewModel.setEvent(UiEvent.LoadProfile)
+    }
+
+    Scaffold (
+        bottomBar = {
+            Button(
+                onClick = { /*…*/ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)   // SAMO horizontalno
+            ) {
+                Text("Save")
+            }
+        }
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+//            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // top deo
+            // gornji deo
             Text(
                 text = "My Profile",
                 style = MaterialTheme.typography.headlineMedium,
@@ -87,8 +103,8 @@ fun ProfileScreen(
             // Skrol deo: istorija svih pokusaja
             LazyColumn(
                 modifier = Modifier
-                    .weight(1f)           // zauzima preostali prostor (fiksno zauzima ceo deo za istoriju, pa je tek na kraju dole na istom mestu -> button)
-                    .fillMaxWidth(),
+                    .fillMaxSize()
+                    .weight(1f),           // zauzima preostali prostor (fiksno zauzima ceo deo za istoriju, pa je tek na kraju dole na istom mestu -> button)
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 itemsIndexed(state.history) { idx, historyItem ->
@@ -96,14 +112,15 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+//            Spacer(Modifier.height(12.dp))
 
-            Button(
-                onClick = onEditClick,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Edit Profile")
-            }
+//            Button(
+//                onClick = onEditClick,
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//            ) {
+//                Text("Edit Profile")
+//            }
         }
     }
 }
@@ -121,84 +138,6 @@ private fun ProfileField(label: String, value: String) {
             text = value.ifBlank { "—" },
             style = MaterialTheme.typography.bodyLarge
         )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun EditProfileScreen(
-    viewModel: ProfileViewModel = hiltViewModel(),
-    onClose: () -> Unit
-) {
-    val state by viewModel.state.collectAsState()
-    var name     by rememberSaveable { mutableStateOf(state.name) }
-    var nickname by rememberSaveable { mutableStateOf(state.nickname) }
-    var email    by rememberSaveable { mutableStateOf(state.email) }
-
-    //  TODO: sve novo za edit profile, i da izvuce data i da ga stvarno menja. (ako je moguce i nickname, za kviz)
-    // listen for "ProfileSaved" effect, to pop back
-    LaunchedEffect(viewModel) {
-        viewModel.effect.collect { effect ->
-            if (effect is SideEffect.ProfileSaved) {
-                onClose()
-            }
-        }
-    }
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Edit Profile") },
-                navigationIcon = {
-                    IconButton(onClick = onClose) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                }
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            OutlinedTextField(
-                value = name, onValueChange = { name = it },
-                label = { Text("Name") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = nickname, onValueChange = { nickname = it },
-                label = { Text("Nickname") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            OutlinedTextField(
-                value = email, onValueChange = { email = it },
-                label = { Text("Email") },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(Modifier.weight(1f))
-
-            Button(
-                onClick = {
-                    viewModel.setEvent(
-                        UiEvent.SaveProfile(name, nickname, email)
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("Save")
-            }
-        }
     }
 }
 

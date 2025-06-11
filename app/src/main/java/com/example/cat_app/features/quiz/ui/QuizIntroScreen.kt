@@ -24,7 +24,9 @@ fun QuizIntroScreen(
         bottomBar = {
             Button (
                 onClick = onStart,
-                modifier = Modifier.fillMaxWidth().padding(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
             ) { Text("Start Quiz") }
         }
     ) { inner ->
