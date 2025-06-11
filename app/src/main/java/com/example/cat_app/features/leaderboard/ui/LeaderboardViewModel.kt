@@ -9,7 +9,9 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class Category(val value: Int) { QUIZ(1) }
+enum class Category(val value: Int) {
+    QUIZ(1)
+}
 
 @HiltViewModel
 class LeaderboardViewModel @Inject constructor(
@@ -19,17 +21,30 @@ class LeaderboardViewModel @Inject constructor(
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
 
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(e: UiEvent) {
+        viewModelScope.launch {
+            events.emit(e)
+        }
+    }
+
     private val _effect = MutableSharedFlow<SideEffect>()
     val effect: SharedFlow<SideEffect> = _effect.asSharedFlow()
 
     init {
-        load()
+        observeEvents()
+
+        setEvent(UiEvent.LoadLeaderboard)      // zapravo hocu ovako, prvi put nek bude API pozvan od strane nas, a posle -> refresh ako oces
     }
 
-    fun setEvent(event: UiEvent) {
-        when (event) {
-            UiEvent.LoadLeaderboard,
-            UiEvent.Refresh -> load()
+    private fun observeEvents() {
+        viewModelScope.launch {
+            events.collect { event ->
+                when (event) {
+                    UiEvent.LoadLeaderboard -> load()
+                    UiEvent.Refresh -> load()
+                }
+            }
         }
     }
 
@@ -60,4 +75,5 @@ class LeaderboardViewModel @Inject constructor(
             }
         }
     }
+
 }

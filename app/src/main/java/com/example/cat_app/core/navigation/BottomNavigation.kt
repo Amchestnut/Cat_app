@@ -84,7 +84,7 @@ fun BottomNavigation() {
         /* case 1 – we are on one of the 4 tab routes */
         currentDest?.route in TopLevelTabRoutes                                    -> true
 
-        /* case 2 – we’re inside the Quiz graph *and* on its start dest (quiz/intro) */
+        /* case 2 – we’re inside the Quiz graph and on its start dest (quiz/intro) */
         currentDest?.parent?.route == BottomNavScreen.Quiz.route &&
                 currentDest.id == (currentDest.parent as NavGraph).startDestinationId     -> true
 
@@ -103,6 +103,8 @@ fun BottomNavigation() {
                     ).forEach { screen ->
                         val selected = currentRoute == screen.route ||
                                 (screen is BottomNavScreen.Quiz && currentRoute?.startsWith(screen.route) == true)
+
+                        // val startDestId = navController.graph.findStartDestination().id;;  mozda ce ovo raditi ako sredim ovu budjavu navigaciju?
 
                         NavigationBarItem(
                             icon = { Icon(screen.iconVector, contentDescription = screen.label) },
@@ -321,44 +323,3 @@ fun BottomNavigation() {
         }
     }
 }
-
-// --- PLACEHOLDER SCREENS ---
-
-//@Composable
-//fun LeaderboardScreen() {
-//    Column(
-//        modifier = Modifier.fillMaxSize(),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-//    ) {
-//        Text("Leaderboard")
-//    }
-//}
-
-//@Composable
-//fun ProfileScreen(onEditClick: () -> Unit) {
-//    Column(
-//        modifier = Modifier.fillMaxSize(),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-//    ) {
-//        Text("Profile")
-//        Button(onClick = onEditClick) {
-//            Text("Edit Profile")
-//        }
-//    }
-//}
-//
-//@Composable
-//fun EditProfileScreen(onClose: () -> Unit) {
-//    Column(
-//        modifier = Modifier.fillMaxSize(),
-//        horizontalAlignment = Alignment.CenterHorizontally,
-//        verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
-//    ) {
-//        Text("Edit Profile")
-//        Button(onClick = onClose) {
-//            Text("Back")
-//        }
-//    }
-//}

@@ -24,9 +24,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.ui.unit.Dp
 
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -62,11 +64,38 @@ fun LeaderboardScreen(
         }
     }
 
+    LeaderboardScreenContent(
+        loading = state.loading,
+        items = state.items,
+        snackbarHost = snackbarHostState,
+        onRefresh = { viewModel.setEvent(LeaderboardContract.UiEvent.Refresh) }
+    )
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LeaderboardScreenContent(
+    loading: Boolean,
+    items: List<LeaderboardItem>,
+    snackbarHost: SnackbarHostState,
+    onRefresh: () -> Unit
+) {
+    // lokalni flag za pull-to-refresh indikator
+    var isRefreshing by rememberSaveable { mutableStateOf(false) }
+
+    // kad load završi, sakrij indikator
+    LaunchedEffect(loading) {
+        if (!loading) {
+            isRefreshing = false
+        }
+    }
+
     Scaffold(
         // uklanja sve automatske insets
         contentWindowInsets = WindowInsets(0),
         containerColor = MaterialTheme.colorScheme.background,
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        snackbarHost = { SnackbarHost(hostState = snackbarHost) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -85,21 +114,30 @@ fun LeaderboardScreen(
             )
 
             // podium za top3
-            Podium(state.items.take(3))
+            Podium(items.take(3))
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // lista ostalih rezultata do samog bottom nava
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                // ako ti treba bottom padding da se ne poklapa sa navigacijom, uncomment sledeću liniju:
-                // contentPadding = PaddingValues(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh    = {
+                    isRefreshing = true
+                    onRefresh()
+                },
+                modifier = Modifier.fillMaxSize()
             ) {
-                items(state.items.drop(3)) { item ->
-                    LeaderboardRow(item)
+                // lista ostalih rezultata do samog bottom nava
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(items.drop(3)) { item ->
+                        LeaderboardRow(item)
+                    }
                 }
             }
+
+
         }
     }
 }

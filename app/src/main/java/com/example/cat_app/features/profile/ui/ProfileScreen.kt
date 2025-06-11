@@ -47,12 +47,12 @@ fun ProfileScreen(
     Scaffold (
         bottomBar = {
             Button(
-                onClick = { /*…*/ },
+                onClick = onEditClick,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 12.dp)   // SAMO horizontalno
             ) {
-                Text("Save")
+                Text("Edit Profile")
             }
         }
     ) { padding ->
