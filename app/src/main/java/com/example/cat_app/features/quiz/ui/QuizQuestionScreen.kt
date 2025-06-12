@@ -231,7 +231,7 @@ fun QuizQuestionScreen(
             ) {
                 items(q.choices) { choice ->
                     val isSelected        = selectedChoice == choice
-                    val isCorrectChoice   = ui.questions[ui.currentIdx].score(choice) == 5
+                    val isCorrectChoice   = selectedChoice == ui.questions[ui.currentIdx].correctChoice
                     val isWrongSelected   = isSelected && !isCorrectChoice
                     val isAnsweredNow     = selectedChoice != null    // ili koristi tvoje isAnswered stanje
 
@@ -291,5 +291,7 @@ fun QuizQuestionScreen(
             )
         }
     }
+
+    BackHandler { }     // Can't go back to quiz, sry
 }
 

@@ -6,7 +6,5 @@ data class ImageToNameQuestion(
     override val questionText: String = "Koja je rasa mačke sa slike?",
     override val imageUrl: String,
     override val choices: List<String>,
-    private val correctChoice: String
-) : Question {
-    override fun score(answer: String) = if (answer == correctChoice) 5 else 0
-}
+    override val correctChoice: String
+) : Question

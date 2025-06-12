@@ -5,7 +5,5 @@ data class IntruderTemperamentQuestion(
     override val questionText: String = "Izbaci uljeza!",
     override val imageUrl: String,
     override val choices: List<String>,
-    private val correctChoice: String
-) : Question {
-    override fun score(answer: String) = if (answer == correctChoice) 5 else 0
-}
+    override val correctChoice: String
+) : Question

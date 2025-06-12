@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cat_app.core.datastore.UserPreferencesRepository
 import com.example.cat_app.features.profile.ui.ProfileScreenContract.*
-import com.example.cat_app.features.quiz.data.repository.QuizResultRepository
+import com.example.cat_app.features.quiz.data.repository.QuizRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userPrefs: UserPreferencesRepository,
-    private val quizRepo: QuizResultRepository
+    private val quizRepo: QuizRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())

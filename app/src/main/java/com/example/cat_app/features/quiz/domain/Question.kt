@@ -5,7 +5,5 @@ interface Question {
     val questionText: String
     val imageUrl: String
     val choices: List<String> // what I show in UI (text or image-urls)
-
-    // Returns points for this answer (0 if incorrect, 5 if correct)
-    fun score(answer: String): Int
+    val correctChoice: String
 }

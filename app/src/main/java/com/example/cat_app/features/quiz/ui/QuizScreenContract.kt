@@ -7,12 +7,13 @@ interface QuizScreenContract {
     data class UiState(
         val questions: List<Question> = emptyList(),
         val currentIdx: Int = 0,
-        val answers: List<Int?> = List(20) { null },
+//        val answers: List<Int?> = List(20) { null },
+        val correctAnswers: Int = 0,
         val remainingMillis: Long = TOTAL_TIME_MS,
         val finished: Boolean = false,
         val posting: Boolean = false,
         val error: Throwable? = null,
-        val totalScore: Int = 0
+        val totalScore: Double = 0.0
     )
 
     sealed interface UiEvent {

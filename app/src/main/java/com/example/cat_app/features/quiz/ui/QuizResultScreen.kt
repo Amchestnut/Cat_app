@@ -68,7 +68,7 @@ fun QuizResultScreen(
     var shareClicked by rememberSaveable { mutableStateOf(false) }
     var doneClicked  by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is QuizScreenContract.SideEffect.ScoreShared -> {

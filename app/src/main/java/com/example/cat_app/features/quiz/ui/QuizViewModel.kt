@@ -10,7 +10,7 @@ import com.example.cat_app.features.quiz.ui.QuizScreenContract.UiState
 import com.example.cat_app.features.quiz.ui.QuizScreenContract.UiEvent
 import com.example.cat_app.features.quiz.ui.QuizScreenContract.SideEffect
 import com.example.cat_app.features.quiz.data.repository.QuizRepository
-import com.example.cat_app.features.quiz.data.repository.QuizResultRepository
+import com.example.cat_app.features.quiz.domain.TOTAL_TIME_MS
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -21,12 +21,12 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 
 @HiltViewModel
 class QuizViewModel @Inject constructor(
-    private val repo: QuizRepository,
-    private val quizResultRepository: QuizResultRepository
+    private val quizRepository: QuizRepository,
 ): ViewModel() {
     val TAG = "QuizViewModel"       // za loggere
 
@@ -67,17 +67,11 @@ class QuizViewModel @Inject constructor(
     }
 
 
-    /**
-     load():
-     - suspend funkcija koja poziva repo.generateQuiz()
-     - u slučaju uspeha postavlja lista pitanja u state
-     - pokreće timer
-     - u slučaju greške hvata izuzetak i beleži u state.error
-     */
+
     private suspend fun load() {
         Log.d(TAG, "Calling repo.generateQuiz()")
         try {
-            val questions = repo.generateQuiz()
+            val questions = quizRepository.generateQuiz()
             Log.d(TAG, "Loaded ${questions.size} questions: $questions")
 
             setState { copy(questions = questions) }
@@ -89,15 +83,7 @@ class QuizViewModel @Inject constructor(
         }
     }
 
-    /**
-     * answer(value):
-     * - ne radi ništa ako je quiz već završen
-     * - izračuna broj poena za trenutni odgovor
-     * - napuni answers listu, inkrementuje currentIdx
-     * - ako smo došli do kraja, poziva finish()
-     *
-     * Ovde mogu da dodam  UI efekat (pucanje konfete) slanjem SideEffect.
-     */
+
     private fun answer(value: Any) {
         val s = _state.value
         if (s.finished){
@@ -106,31 +92,30 @@ class QuizViewModel @Inject constructor(
         }
 
         val currentQuestion = s.questions[s.currentIdx]
-        val selected       = value.toString()
-        val points         = currentQuestion.score(selected)    // metoda ".score()" proveri da li je odgovor tacan, i vrati 5 poena ako jeste, odnosno 0 ako je netacan
-
-//        val currentQuestion = s.questions.getOrNull(s.currentIdx)
-//        val points = s.questions[s.currentIdx].score(value.toString())      // direktno promenim skor pitanja u [5] ako je odgovor TACAN
-
-//        Log.d(TAG, "Answering question #${s.currentIdx + 1}: $currentQuestion")
-//        Log.d(TAG, "User chose: $value")
+        val selected = value.toString()
+        val isCorrect = selected == currentQuestion.correctChoice
 
         setState {
-            val newAnswers = answers.toMutableList().also { it[currentIdx] = points }
-            // uradicemo ovo direktno ovde, a ne pomocu neke pomocne funkcije
-            val newTotal   = newAnswers.filterNotNull().sum()
+            // 1) ažuriraj BTO
+            val updatedBto = correctAnswers + if (isCorrect) 1 else 0
+
+            // 2) preostalo vreme u sekundama
+            val pvt = remainingMillis / 1000.0
+            // 3) maksimalno vreme
+            val mvt = TOTAL_TIME_MS / 1000.0
+
+            // 4) UBP formula i limit
+            val ukupanBrojPoena = updatedBto * 2.5 * (1 + (pvt + 120) / mvt)
+            val max100 = ukupanBrojPoena.coerceAtMost(100.0)
+            val totalScore  = (max100 * 100).roundToInt() / 100.0
+
             copy(
-                answers    = newAnswers,
-                currentIdx = currentIdx + 1,                     // inkrementujemo pitanje na sledece
-                finished = currentIdx + 1 == questions.size,     // prost boolean, jel smo dosli do kraja?
-                totalScore = newTotal,
+                correctAnswers = updatedBto,
+                currentIdx     = currentIdx + 1,
+                finished       = (currentIdx + 1) >= questions.size,
+                totalScore     = totalScore
             )
         }
-
-
-        // samo za LOGCAT
-        val newState = _state.value
-        Log.d(TAG, "New state → currentIdx=${newState.currentIdx}, answers=${newState.answers}, finished=${newState.finished}")
 
         // ako smo zavrsili, promenili smo bili finished FALSE -> TRUE, i okinucemo ovaj finish()
         if (_state.value.finished) {
@@ -140,11 +125,7 @@ class QuizViewModel @Inject constructor(
     }
 
 
-    /**
-     * startTimer():
-     * - cancel-uje postojeći timerJob ako postoji
-     * - pokreće novi coroutine koji svakih 1s emituje UiEvent.Tick
-     */
+
     private fun startTimer() {
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
@@ -165,23 +146,25 @@ class QuizViewModel @Inject constructor(
         }
     }
 
-    /**
-     * finish():
-     * - čuva rezultat lokalno (quizResultRepository.saveLocal)
-     * - cancel-uje timerJob
-     * - šalje SideEffect.NavigateToResult da UI zatvori screen
-     *
-     * Savrseno vreme za ubacivanje neke animacije
-     */
-    private fun finish() {
-        Log.d(TAG, "finish(): local save done, now navigating to result")
-        viewModelScope.launch {
-            val total = state.value.totalScore
-            quizResultRepository.saveLocal(total.toDouble())
-        }
 
-        Log.d(TAG, "finish() called, sending NavigateToResult")
+    private fun finish() {
         timerJob?.cancel()
+        val s = state.value
+
+        // ponovo izračunamo za log i za slanje
+        val bto = s.correctAnswers
+        val pvt = s.remainingMillis / 1000.0
+        val mvt = TOTAL_TIME_MS   / 1000.0
+
+        val ukupanBrojPoena = bto * 2.5 * (1 + (pvt + 120) / mvt)
+        val max100 = ukupanBrojPoena.coerceAtMost(100.0)
+        val totalScore  = (max100 * 100).roundToInt() / 100.0
+
+        Log.d(TAG, "finish(): BTO=$bto, PVT=$pvt, ukupanBrojPoena=$ukupanBrojPoena, totalScore=$totalScore")
+
+        viewModelScope.launch {
+            quizRepository.saveLocal(totalScore)
+        }
         _effect.trySend(SideEffect.NavigateToResult)
     }
 
@@ -193,31 +176,24 @@ class QuizViewModel @Inject constructor(
     }
 
 
-    /**
-     * share():
-     * - postavlja posting = true u state (da UI može da prikaže loader)
-     * - poziva repo.postScore(totalScore())
-     * - pri uspehu emituje SideEffect.ScoreShared
-     * - pri grešci upisuje err u state.error
-     * - na kraju resetuje posting = false
-     *
-     * Ovde bi bilo kul da dodam neku animaciju
-     */
     private fun share() = viewModelScope.launch {
+        Log.d(TAG, "share(): SharePressed event received, starting publish…")
         setState { copy(posting = true) }
+
         kotlin.runCatching {
             val total = state.value.totalScore
-            repo.postScore(total)
-        }.onSuccess {
-            Log.d(TAG, "Score successfully shared to server!")
-            /*  ViewModel po pravilu MVI ne sme direktno da prikazuje snackbar, toast ili dialog, nego je ovo SIDE EFFECT, pa mozemo ovo da uhvatimo u UI i prikazemo
-                Takodje, bolje da koristim trySend nego send, jer viewmodel ce ostati blokiran ako UI trenutno ne slusa.  */
-
+            Log.d(TAG, "share(): publishing totalScore=$total")
+            val ranking = quizRepository.publish(total)
+            Log.d(TAG, "share(): publish returned ranking=$ranking")
+            ranking
+        }.onSuccess { ranking ->
+            Log.d(TAG, "share(): Score successfully shared! Server ranking=$ranking")
             _effect.trySend(SideEffect.ScoreShared)
-
         }.onFailure { err ->
+            Log.e(TAG, "share(): Error publishing score", err)
             setState { copy(error = err) }
         }.also {
+            Log.d(TAG, "share(): setting posting=false")
             setState { copy(posting = false) }
         }
     }

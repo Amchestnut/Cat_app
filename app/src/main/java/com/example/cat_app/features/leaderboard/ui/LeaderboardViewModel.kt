@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cat_app.features.leaderboard.data.LeaderboardRepository
 import com.example.cat_app.features.leaderboard.ui.LeaderboardContract.*
+import com.example.cat_app.features.quiz.ui.QuizScreenContract
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -20,6 +21,8 @@ class LeaderboardViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UiState())
     val state: StateFlow<UiState> = _state.asStateFlow()
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(e: UiEvent) {
@@ -50,7 +53,9 @@ class LeaderboardViewModel @Inject constructor(
 
     private fun load() {
         viewModelScope.launch {
-            _state.update { it.copy(loading = true, errorMessage = null) }
+            setState {
+                copy(loading = true, errorMessage = null)
+            }
             try {
                 val raw = repository.getLeaderboard(Category.QUIZ.value)
 
@@ -67,11 +72,14 @@ class LeaderboardViewModel @Inject constructor(
                     )
                 }
 
-                _state.update { it.copy(loading = false, items = items) }
+                setState {
+                    copy(loading = false, items = items)
+                }
 
             } catch (t: Throwable) {
-                _state.update { it.copy(loading = false, errorMessage = t.message) }
-                _effect.emit(SideEffect.ShowError(t.message ?: "Unknown error"))
+                setState {
+                    copy(loading = false, errorMessage = t.message)
+                }
             }
         }
     }
