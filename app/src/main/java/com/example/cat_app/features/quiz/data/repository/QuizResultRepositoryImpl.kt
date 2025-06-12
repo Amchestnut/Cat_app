@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class QuizResultRepositoryImpl @Inject constructor(
     private val api: LeaderboardApiService,       // retrofit interfejs za POST i GET
     private val db: AppDatabase,

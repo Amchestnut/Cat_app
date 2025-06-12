@@ -296,14 +296,23 @@ fun BottomNavigation() {
 
             composable(
                 route = "gallery/{breedId}",
-                arguments = listOf(navArgument("breedId") { type = NavType.StringType })
+                arguments = listOf(navArgument("breedId") {
+                    type = NavType.StringType
+                })
             ) { backStackEntry ->
                 val breedId = backStackEntry.arguments!!.getString("breedId")!!
                 val vm = hiltViewModel<BreedGalleryViewModel>()
+
                 BreedGalleryScreen(
                     viewModel = vm,
-                    onPhotoClick = { _, index -> navController.navigate("photoViewer/$breedId/$index") },
-                    onClose = { navController.popBackStack() }
+                    onPhotoClick = { images, index ->
+                        backStackEntry.savedStateHandle["startIndex"] = index
+
+                        navController.navigate("photoViewer/$breedId/$index")
+                    },
+                    onClose = {
+                        navController.popBackStack()
+                    }
                 )
             }
 
@@ -317,7 +326,7 @@ fun BottomNavigation() {
                 val vm = hiltViewModel<PhotoViewerViewModel>()
                 PhotoViewerScreen(
                     viewModel = vm,
-                    onClose = { navController.popBackStack() }
+                    onClose = { navController.popBackStack() },
                 )
             }
         }

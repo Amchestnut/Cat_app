@@ -4,7 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cat_app.core.ui.ARG_SPECIES_ID
-import com.example.cat_app.features.allspecies.data.repository.AllSpeciesRepository
+import com.example.cat_app.features.allspecies.data.repository.BreedRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,9 +16,7 @@ import javax.inject.Inject
 import com.example.cat_app.features.details_screen.SpeciesDetailsScreenContract.UiEvent
 import com.example.cat_app.features.details_screen.SpeciesDetailsScreenContract.UiState
 import com.example.cat_app.features.details_screen.SpeciesDetailsScreenContract.SideEffect
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.update
 
@@ -26,7 +24,7 @@ import kotlinx.coroutines.flow.update
 @HiltViewModel
 class SpeciesDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val allSpeciesRepository: AllSpeciesRepository,
+    private val breedRepository: BreedRepository,
 ) : ViewModel() {
 
     private val breedId = savedStateHandle.get<String>(ARG_SPECIES_ID) ?: "Species not found"
@@ -57,7 +55,7 @@ class SpeciesDetailsViewModel @Inject constructor(
 
     private fun loadFromDatabase() {
         viewModelScope.launch {
-            allSpeciesRepository
+            breedRepository
                 .observeBreed(breedId)
                 .filterNotNull()
                 // ovaj collect je MNOGO BITAN.

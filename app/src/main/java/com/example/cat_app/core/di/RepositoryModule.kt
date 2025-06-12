@@ -1,7 +1,7 @@
 package com.example.cat_app.core.di
 
-import com.example.cat_app.features.allspecies.data.repository.AllSpeciesRepository
 import com.example.cat_app.features.allspecies.data.repository.BreedRepository
+import com.example.cat_app.features.allspecies.data.repository.BreedRepositoryImpl
 import com.example.cat_app.features.quiz.data.repository.QuizRepository
 import com.example.cat_app.features.quiz.data.repository.QuizRepositoryImpl
 import com.example.cat_app.features.quiz.data.repository.QuizResultRepository
@@ -35,7 +35,7 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
     @Provides
-    fun provideRepo(impl: BreedRepository): AllSpeciesRepository = impl
+    fun provideRepo(impl: BreedRepositoryImpl): BreedRepository = impl
 
     @Provides
     fun provideQuizRepository(impl: QuizRepositoryImpl): QuizRepository = impl

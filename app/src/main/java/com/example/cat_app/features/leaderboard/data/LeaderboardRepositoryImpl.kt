@@ -2,7 +2,9 @@ package com.example.cat_app.features.leaderboard.data
 
 import com.example.cat_app.features.quiz.data.local.QuizResultDTO
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class LeaderboardRepositoryImpl @Inject constructor(
     private val api: LeaderboardApiService
 ) : LeaderboardRepository {

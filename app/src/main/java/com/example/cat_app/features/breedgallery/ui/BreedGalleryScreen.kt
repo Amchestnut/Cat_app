@@ -33,6 +33,10 @@ fun BreedGalleryScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    LaunchedEffect (state.breedId) {
+        viewModel.setEvent(BreedGalleryContract.UiEvent.LoadImages(breedId = state.breedId))
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(

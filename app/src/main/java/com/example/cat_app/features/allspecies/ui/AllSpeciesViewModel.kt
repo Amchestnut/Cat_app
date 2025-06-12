@@ -11,7 +11,7 @@ import javax.inject.Inject
 import com.example.cat_app.features.allspecies.ui.AllSpeciesScreenContract.UiState
 import com.example.cat_app.features.allspecies.ui.AllSpeciesScreenContract.UiEvent
 import com.example.cat_app.features.allspecies.ui.AllSpeciesScreenContract.SideEffect
-import com.example.cat_app.features.allspecies.data.repository.AllSpeciesRepository
+import com.example.cat_app.features.allspecies.data.repository.BreedRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
 // Hilt ce zbog toga automatski generisati potrebnu fabriku (factory) i “ugraditi” je u DI graf.
 @HiltViewModel
 class AllSpeciesViewModel @Inject constructor(
-    private val allSpeciesRepository : AllSpeciesRepository,    // zapravo ja mu injectujem AllSpeciesRepositoryInMemory, tj konkretnu implementaciju, jer je AllSpeciesRepository samo interfejs.
+    private val breedRepository : BreedRepository,    // zapravo ja mu injectujem AllSpeciesRepositoryInMemory, tj konkretnu implementaciju, jer je AllSpeciesRepository samo interfejs.
 ) : ViewModel(){
     // MutableStateFlow je „hot“ (uvek aktivan) tok podataka koji cuva tacno 1 vrednost.
 
@@ -75,13 +75,13 @@ class AllSpeciesViewModel @Inject constructor(
         }
 
         // 2) osvezim bazu sa mreze, ucitam ponovo sa API-ja
-        runCatching { allSpeciesRepository.refreshAllSpecies() }
+        runCatching { breedRepository.refreshAllSpecies() }
             .onFailure { t ->
                 setState { copy(loading = false, error = t) }
             }
 
         // 3) kolektuj iz baze
-        allSpeciesRepository.observeAllSpecies()
+        breedRepository.observeAllSpecies()
             .collect { list ->
                 setState {
                     val filtered = if (searchQuery.isBlank()) list else list.filter {

@@ -7,7 +7,8 @@ interface BreedGalleryContract {
     data class UiState(
         val loading: Boolean = false,
         val images: List<BreedImage> = emptyList(),
-        val error: Throwable? = null
+        val error: Throwable? = null,
+        val breedId: String = "",
     )
 
     sealed class UiEvent {

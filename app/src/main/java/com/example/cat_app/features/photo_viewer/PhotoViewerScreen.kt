@@ -1,7 +1,5 @@
 package com.example.cat_app.features.photo_viewer
 
-// TODO
-
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,8 +25,9 @@ fun PhotoViewerScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect(state.images, state.currentIndex) {
-        Log.d("PhotoViewerScreen", "state: images.size=${state.images.size}, currentIndex=${state.currentIndex}")
+    LaunchedEffect (Unit){
+        Log.d("LaunchedEffect from PhotoViewerScreen", "Opened photo viewer")
+        viewModel.setEvent(PhotoViewerContract.UiEvent.LoadDetails(state.breedId))
     }
 
     val pagerState = rememberPagerState(
@@ -55,10 +54,10 @@ fun PhotoViewerScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) { page ->
-            // Logujemo svaki put kad pager prikaze novu stranicu, i menjamo u modelu da prikazemo trenutnu stranicu
+            // Svaki put kad pager prikaze novu stranicu menjamo u modelu STANJE, i prikazemo trenutnu stranicu
             LaunchedEffect(page) {
                 Log.d("PhotoViewerScreen", "Displaying page=$page, url=${state.images.getOrNull(page)}")
-                viewModel.setPage(page)
+                viewModel.setEvent(PhotoViewerContract.UiEvent.SetPage(page))
             }
             AsyncImage(
                 model = state.images[page],

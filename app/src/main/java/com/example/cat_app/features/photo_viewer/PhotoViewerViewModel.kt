@@ -12,7 +12,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import com.example.cat_app.features.photo_viewer.PhotoViewerContract.UiState
+import com.example.cat_app.features.photo_viewer.PhotoViewerContract.UiEvent
 import com.example.cat_app.features.breedgallery.data.repository.BreedImagesRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 
 
@@ -21,24 +23,42 @@ class PhotoViewerViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val repository: BreedImagesRepository,
 ) : ViewModel() {
-    // samo za debugging trenutno
-    private val images: List<String> = savedStateHandle.get<List<String>>("images") ?: emptyList()
 
+    private val images: List<String> = savedStateHandle.get<List<String>>("images") ?: emptyList()
     private val breedId: String = savedStateHandle.get<String>("breedId") ?: throw IllegalArgumentException("breedId missing")
     private val startIndex: Int = savedStateHandle.get<Int>("startIndex") ?: 0
 
-    private val _state = MutableStateFlow(
-        UiState(
-            images = emptyList(),
-            currentIndex = startIndex,
+    private val _state = MutableStateFlow(UiState(
+        breedId = breedId,
+        images = images,
+        currentIndex = startIndex,
+        loading = true,
+        error = null
         )
     )
-    val state: StateFlow<UiState> = _state.asStateFlow()
+    val state = _state.asStateFlow()
     private fun setState(reducer : UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(event: UiEvent) = viewModelScope.launch {
+        events.emit(event)
+    }
+
     init {
+        observeEvents()
+
         Log.d("PhotoViewerVM", "init: images.size=${images.size}, startIndex=$startIndex")
-        loadImages()
+    }
+
+    private fun observeEvents() = viewModelScope.launch{
+        events.collect { event ->
+            when(event){
+                is UiEvent.LoadDetails -> loadImages()
+                is UiEvent.SetPage -> setPage(event.index)
+                else -> Unit
+            }
+
+        }
     }
 
     private fun loadImages() = viewModelScope.launch {
@@ -49,15 +69,15 @@ class PhotoViewerViewModel @Inject constructor(
                 it.url
             }
             Log.d("PhotoViewerVM", "Loaded ${urls.size} images for $breedId")
-            setState { copy(images = urls, loading = false) }
+            setState { copy(images = urls, currentIndex = startIndex, loading = false) }
         }
         catch (t: Throwable) {
             Log.e("PhotoViewerVM", "Error loading images", t)
-            setState { copy(error = t.toString(), loading = false) }
+            setState { copy(error = t.toString(), currentIndex = startIndex, loading = false) }
         }
     }
 
-    fun setPage(index: Int) {
+    private fun setPage(index: Int) {
         Log.d("PhotoViewerVM", "setPage($index)")
         setState { copy(currentIndex = index) }
     }

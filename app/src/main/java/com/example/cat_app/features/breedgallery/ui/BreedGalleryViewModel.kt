@@ -13,7 +13,9 @@ import com.example.cat_app.features.breedgallery.ui.BreedGalleryContract.UiEvent
 import com.example.cat_app.features.breedgallery.ui.BreedGalleryContract.SideEffect
 import com.example.cat_app.features.breedgallery.data.repository.BreedImagesRepository
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -28,21 +30,28 @@ class BreedGalleryViewModel @Inject constructor(
 
     private val breedId: String = savedStateHandle.get<String>("breedId") ?: throw IllegalArgumentException("breedId is required")
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(breedId = breedId))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(event: UiEvent) = viewModelScope.launch {
+        events.emit(event)
+    }
 
     private val _effect = Channel<SideEffect>()
     val effect = _effect.receiveAsFlow()
 
 
     init{
-        setEvent(UiEvent.LoadImages(breedId))
+        observeEvents()
     }
 
-    fun setEvent(event: UiEvent) {
-        when (event) {
-            is UiEvent.LoadImages -> loadImages(event.breedId)
+    private fun observeEvents() = viewModelScope.launch {
+        events.collect { event ->
+            when (event) {
+                is UiEvent.LoadImages -> loadImages(event.breedId)
+            }
         }
     }
 
