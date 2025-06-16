@@ -93,7 +93,6 @@ fun QuizQuestionScreen(
     // Resetuj stanja kad se promeni pitanje
     LaunchedEffect(ui.currentIdx) {
         selectedChoice = null
-        isCorrect = null
         isAnswered = false
     }
 
@@ -102,9 +101,9 @@ fun QuizQuestionScreen(
     // Sve sto napisem unutra je -> SUSPEND CONTEXT, pa delay() radi bez problema
     LaunchedEffect(pendingChoice) {
         pendingChoice?.let { choice ->
-            delay(100L)
+            isAnswered = true
+            delay(1000L)
             viewModel.setEvent(UiEvent.AnswerChosen(choice))
-            pendingChoice = null
         }
     }
 
@@ -219,7 +218,7 @@ fun QuizQuestionScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // --- Odgovori kao grid ---
+            // ------- Odgovori kao grid ------
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier
@@ -230,21 +229,25 @@ fun QuizQuestionScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(q.choices) { choice ->
-                    val isSelected        = selectedChoice == choice
-                    val isCorrectChoice   = selectedChoice == ui.questions[ui.currentIdx].correctChoice
-                    val isWrongSelected   = isSelected && !isCorrectChoice
-                    val isAnsweredNow     = selectedChoice != null    // ili koristi tvoje isAnswered stanje
+                    val isUserSelected = selectedChoice == choice
+                    val isCorrectAnswer = choice == q.correctChoice
 
-                    // Boja prema matrici slučajeva
+                    // Logika bojenja dugmeta
                     val buttonColor by animateColorAsState(
                         targetValue = when {
-                            !isAnsweredNow               -> MaterialTheme.colorScheme.primary   // još nije odgovoreno
-                            isCorrectChoice              -> Color.Green.copy(alpha = 0.8f)   // tačan = zeleno
-                            isWrongSelected              -> Color.Red.copy(alpha = 0.8f)        // pogrešan klik = crveno
-                            else                         -> Color(0xFFBDBDBD)      // ostali = sivo
+                            // Ako je odgovor već poslat (isAnswered je true)
+                            isAnswered -> {
+                                when {
+                                    isCorrectAnswer -> Color.Green.copy(alpha = 0.8f)   // Ako je ovo tačan odgovor, oboji ga zeleno
+                                    isUserSelected && !isCorrectAnswer -> Color.Red.copy(alpha = 0.8f)  // Ako je ovo bio korisnikov izabrani odgovor I nije tačan, oboji ga crveno
+                                    else -> Color(0xFFBDBDBD) // Svi ostali dugmici kada je odgovor poslat treba da budu sivi
+                                }
+                            }
+                            // Ako odgovor još nije poslat, svi dugmici su primarne boje teme
+                            else -> MaterialTheme.colorScheme.primary
                         },
-                        animationSpec = tween(400),
-                        label = "BtnColor"
+                        animationSpec = tween(durationMillis = 400),
+                        label = "BtnColorAnimation"
                     )
 
                     Button(
@@ -259,7 +262,7 @@ fun QuizQuestionScreen(
                         onClick = {
                             if (selectedChoice == null) {            // dozvoli klik samo prvi put
                                 selectedChoice = choice              // setuj odgovor
-                                if (!isCorrectChoice)
+                                if (choice != q.correctChoice)
                                     playSound()    // zvuk greške
 
                                 // odlozimo sve za 1s, da ima vremena da se prikaze animacija, u LE je korutina (neophodno)

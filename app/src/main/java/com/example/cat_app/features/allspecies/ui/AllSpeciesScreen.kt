@@ -146,8 +146,8 @@ private fun AllSpeciesScreenContent(
                 label = { Text("Search breeds…") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
                 colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.White,
-                    unfocusedContainerColor = Color.White
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 ),
 
                 modifier = Modifier

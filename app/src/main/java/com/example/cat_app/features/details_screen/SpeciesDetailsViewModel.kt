@@ -3,7 +3,7 @@ package com.example.cat_app.features.details_screen
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cat_app.core.ui.ARG_SPECIES_ID
+import com.example.cat_app.core.navigation.ARG_SPECIES_ID
 import com.example.cat_app.features.allspecies.data.repository.BreedRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel

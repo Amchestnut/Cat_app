@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cat_app.core.ui.theme.CatBeige
+import com.example.cat_app.core.ui.theme.CatWhite
 import com.example.cat_app.core.ui.theme.ScoreYellow
 import com.example.cat_app.features.profile.ui.ProfileScreenContract.SideEffect
 import com.example.cat_app.features.profile.ui.ProfileScreenContract.UiEvent
@@ -39,7 +40,7 @@ fun ProfileScreen(
     }
 
     Scaffold(
-        containerColor = CatBeige,
+        containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             Button(
                 onClick = onEditClick,
@@ -54,7 +55,7 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(CatBeige)
+                .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
                 .padding(10.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -62,14 +63,15 @@ fun ProfileScreen(
             Text(
                 text = "My Profile",
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
             )
             Spacer(Modifier.height(24.dp))
 
             // Personal details card
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = Color.White,
+                    containerColor = CatBeige,
                     contentColor = Color.Black
                 ),
                 modifier = Modifier
@@ -101,7 +103,7 @@ fun ProfileScreen(
                 // Best Score Card
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = CatBeige,
                         contentColor = Color.Black
                     ),
                     modifier = Modifier.weight(1f),
@@ -137,7 +139,7 @@ fun ProfileScreen(
                 // Global Rank Card (if available)
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color.White,
+                        containerColor = CatBeige,
                         contentColor = Color.Black
                     ),
                     modifier = Modifier.weight(1f),
@@ -194,7 +196,6 @@ fun ProfileScreen(
     }
 }
 
-
 @Composable
 private fun ProfileField(label: String, value: String) {
     Column {
@@ -217,7 +218,7 @@ private fun HistoryRow(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = Color.White,
+            containerColor = CatBeige,
             contentColor = Color.Black
         ),
         modifier = Modifier

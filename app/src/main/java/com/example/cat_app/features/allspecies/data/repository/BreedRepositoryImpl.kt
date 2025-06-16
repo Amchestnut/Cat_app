@@ -37,7 +37,16 @@ class BreedRepositoryImpl @Inject constructor(
             .map { it?.toDomain() }    // mapiram dobijeni BREED ENTITY u BREED DOMAIN
 
 
+/*
+Mogao sam da uradim i ovo:
+override suspend fun refreshAllSpecies() = withContext(Dispatchers.IO) {
+  val dtos = api.getAllBreeds()
+  dao.upsertAll(dtos.map { it.toEntity() })
+}
 
+ali nece doprineti nista, jer retrofit suspend funkcije same izvrsavaju HTTP pozive na pozadinskom threadu (okHTTP pool thread-ova)
+OkHTTP ima svoj Dispatcher koji drzi pool java niti, i na jednoj od njih izvrsava mrezni request
+ */
     override suspend fun refreshAllSpecies() {
         Log.d(TAG, "refreshAllSpecies: starting fetch from network…")
         try {
