@@ -71,15 +71,12 @@ class QuizRepositoryImpl @Inject constructor(
     override suspend fun publish(result: Double): Int {
         val nickname = userPrefs.nicknameFlow.first()
 
-        // dobicu response koji je tipa "PostResultResponse", tu imam 1)QuizResult i 2)ranking
+        // dobicu response koji je tipa "PostResultResponse", tu imam 1)QuizResultDTO i 2)ranking
         val response = api.postResult(PostResultRequest(nickname, result, 1))
         val ranking = response.ranking
 
-        // Dohvatim prethodno ubacen lokalni zapis
+        // Dohvatim prethodno ubacen lokalni zapis. Mozda je ovo trebalo malo bolje, da prvo DTO pretvorim u DOMAIN, pa DOMAIN u ENTITY, tj da azuriram entity sa ovim ID,
         val latest = db.quizResultDao().getLatestResult()
-//        val latest = response.result  // TODO: trebalo bi mozda ovako
-
-        // logggggg
 
         if (latest != null) {
             // Napravi kopiju sa published=true i ranking za svaki slucaj
