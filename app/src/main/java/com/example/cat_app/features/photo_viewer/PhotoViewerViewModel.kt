@@ -55,9 +55,7 @@ class PhotoViewerViewModel @Inject constructor(
             when(event){
                 is UiEvent.LoadDetails -> loadImages()
                 is UiEvent.SetPage -> setPage(event.index)
-                else -> Unit
             }
-
         }
     }
 

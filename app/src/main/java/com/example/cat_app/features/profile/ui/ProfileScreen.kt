@@ -1,36 +1,30 @@
 package com.example.cat_app.features.profile.ui
 
-
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.cat_app.features.profile.ui.ProfileViewModel
-import com.example.cat_app.features.profile.ui.ProfileScreenContract.SideEffect
-import com.example.cat_app.features.profile.ui.ProfileScreenContract.UiEvent
-import java.sql.Date
-import java.text.SimpleDateFormat
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material.icons.outlined.Star
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.cat_app.core.ui.theme.CatBeige
 import com.example.cat_app.core.ui.theme.ScoreYellow
+import com.example.cat_app.features.profile.ui.ProfileScreenContract.SideEffect
+import com.example.cat_app.features.profile.ui.ProfileScreenContract.UiEvent
 import com.example.cat_app.features.quiz.data.local.QuizResultEntity
+import java.sql.Date
+import java.text.SimpleDateFormat
 import java.util.Locale
 
 @Composable
@@ -40,17 +34,18 @@ fun ProfileScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    LaunchedEffect (Unit) {
+    LaunchedEffect(Unit) {
         viewModel.setEvent(UiEvent.LoadProfile)
     }
 
-    Scaffold (
+    Scaffold(
+        containerColor = CatBeige,
         bottomBar = {
             Button(
                 onClick = onEditClick,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)   // SAMO horizontalno
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
             ) {
                 Text("Edit Profile")
             }
@@ -59,12 +54,11 @@ fun ProfileScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(CatBeige)
                 .padding(padding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-//            verticalArrangement = Arrangement.SpaceBetween
+                .padding(10.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // gornji deo
             Text(
                 text = "My Profile",
                 style = MaterialTheme.typography.headlineMedium,
@@ -72,12 +66,14 @@ fun ProfileScreen(
             )
             Spacer(Modifier.height(24.dp))
 
+            // Personal details card
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = CatBeige,
-                    contentColor   = Color.Black
+                    containerColor = Color.White,
+                    contentColor = Color.Black
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 elevation = CardDefaults.cardElevation(8.dp),
             ) {
@@ -95,35 +91,105 @@ fun ProfileScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            Text("Best score: ${"%.2f".format(state.bestScore)}", fontSize = 18.sp)
-            state.bestRanking?.let { Text("Best global rank: #$it", fontSize = 18.sp) }
+            // Stats row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                // Best Score Card
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Star,
+                            contentDescription = "Best Score",
+                            modifier = Modifier.size(28.dp),
+                            tint = ScoreYellow
+                        )
+                        Text(
+                            text = "${"%.2f".format(state.bestScore)}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Text(
+                            text = "Best Score",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+
+                // Global Rank Card (if available)
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White,
+                        contentColor = Color.Black
+                    ),
+                    modifier = Modifier.weight(1f),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.EmojiEvents,
+                            contentDescription = "Global Rank",
+                            modifier = Modifier.size(28.dp),
+                            tint = ScoreYellow
+                        )
+                        Text(
+                            text = state.bestRanking?.let { "#$it" } ?: "N/A",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        Text(
+                            text = "Global Rank",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
 
             Spacer(Modifier.height(16.dp))
 
-            Text("Quiz history", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "Quiz history",
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(Modifier.height(8.dp))
 
-            // Skrol deo: istorija svih pokusaja
+            // History list
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .weight(1f),           // zauzima preostali prostor (fiksno zauzima ceo deo za istoriju, pa je tek na kraju dole na istom mestu -> button)
+                    .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 itemsIndexed(state.history) { idx, historyItem ->
                     HistoryRow(index = idx + 1, item = historyItem)
                 }
             }
-
-//            Spacer(Modifier.height(12.dp))
-
-//            Button(
-//                onClick = onEditClick,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//            ) {
-//                Text("Edit Profile")
-//            }
         }
     }
 }
@@ -144,7 +210,6 @@ private fun ProfileField(label: String, value: String) {
     }
 }
 
-
 @Composable
 private fun HistoryRow(
     index: Int,
@@ -152,8 +217,8 @@ private fun HistoryRow(
 ) {
     Card(
         colors = CardDefaults.cardColors(
-            containerColor = CatBeige,
-            contentColor   = Color.Black
+            containerColor = Color.White,
+            contentColor = Color.Black
         ),
         modifier = Modifier
             .fillMaxWidth()
@@ -167,7 +232,6 @@ private fun HistoryRow(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // lokalni redni broj
             Text(
                 "$index.",
                 fontWeight = FontWeight.Bold,
@@ -176,7 +240,6 @@ private fun HistoryRow(
             Spacer(Modifier.width(8.dp))
 
             Column(modifier = Modifier.weight(1f)) {
-                // prikaz datuma
                 Text(
                     text = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
                         .format(Date(item.timestamp)),
@@ -184,12 +247,11 @@ private fun HistoryRow(
                 )
                 Spacer(Modifier.height(4.dp))
 
-                // rezultat
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         Icons.Outlined.Star,
                         contentDescription = "Score",
-                        tint = ScoreYellow ,
+                        tint = ScoreYellow,
                         modifier = Modifier.size(20.dp)
                     )
                     Spacer(Modifier.width(4.dp))
@@ -199,7 +261,6 @@ private fun HistoryRow(
                     )
                 }
 
-                // globalna pozicija, ako je objavljeno
                 item.ranking?.let { rank ->
                     Spacer(Modifier.height(4.dp))
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -220,4 +281,3 @@ private fun HistoryRow(
         }
     }
 }
-

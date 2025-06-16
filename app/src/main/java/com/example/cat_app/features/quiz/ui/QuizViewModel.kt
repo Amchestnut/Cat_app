@@ -181,11 +181,11 @@ class QuizViewModel @Inject constructor(
         setState { copy(posting = true) }
 
         kotlin.runCatching {
-            val total = state.value.totalScore
+            val total = state.value.totalScore           // I send my total score
+            val ranking = quizRepository.publish(total)  // I receive the my new ranking on leaderboard
+
             Log.d(TAG, "share(): publishing totalScore=$total")
-            val ranking = quizRepository.publish(total)
             Log.d(TAG, "share(): publish returned ranking=$ranking")
-            ranking
         }.onSuccess { ranking ->
             Log.d(TAG, "share(): Score successfully shared! Server ranking=$ranking")
             _effect.trySend(SideEffect.ScoreShared)

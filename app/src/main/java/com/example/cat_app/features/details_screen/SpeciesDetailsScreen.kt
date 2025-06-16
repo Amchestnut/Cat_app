@@ -56,6 +56,7 @@ fun SpeciesDetailsScreen(
         }
     }
 
+
 //    val breed = uiState.value.breed!!   // OVO NIJE BEZBEDNO, jer sta ako podaci ne stignu? Sve crashuje. Zato je ovaj drugi nacin ispod bezbedniji
     when {
         state.loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

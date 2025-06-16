@@ -36,7 +36,7 @@ fun LoginScreen(
                     onLoginSuccess()
 
                 is LoginScreenContract.SideEffect.ShowError ->
-                    // npr. toast, SnackBar… ovde samo log
+                    // npr toast, SnackBar… ovde samo log
                     Log.e("Login", effect.message)
             }
         }

@@ -28,12 +28,16 @@ import dagger.hilt.components.SingletonComponent
 //}
 
 
-// @PROVIDES SU BUKVALNO STATICKE METODE, i dalje RADIMO INJECT, ali sada HILT generise kod koji, u momentu potrebe za tom zavisnoscu, poziva tu metodu i koristi rezultat
+// @PROVIDES SU BUKVALNO STATICKE METODE, i dalje RADIMO INJECT, ali sada HILT generise kod - koji, u momentu potrebe za tom zavisnoscu, poziva tu metodu i koristi rezultat
 // ali sada ja definisem metodu u modulu, koja VRACA TRAZENI TIP.   Npr, kod @BINDS, hilt radi KASTOVANJE.
 
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
+
+    // 1) kad god treba BreedRepository, Hilt će:
+    //    a) sam napraviti BreedRepositoryImpl (ima @Inject constructor)
+    //    b) pozvati ovu metodu i vratiti je kao BreedRepository
     @Provides
     fun provideRepo(impl: BreedRepositoryImpl): BreedRepository = impl
 

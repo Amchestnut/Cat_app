@@ -55,7 +55,7 @@ fun BreedGalleryScreen(
             when {
                 state.loading -> CenteredProgress()
                 state.error != null -> CenteredError(state.error!!.message)
-                else -> PhotoGrid(images = state.images, onPhotoClick)
+                else -> PhotoGrid(images = state.images, onPhotoClick)      // pravim foto grid, i prosledjujem ovaj onPhotoClick, za slucaj ako se klikne na slicicu
             }
         }
     }

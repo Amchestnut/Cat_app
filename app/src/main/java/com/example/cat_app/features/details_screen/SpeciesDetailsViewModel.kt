@@ -27,7 +27,7 @@ class SpeciesDetailsViewModel @Inject constructor(
     private val breedRepository: BreedRepository,
 ) : ViewModel() {
 
-    private val breedId = savedStateHandle.get<String>(ARG_SPECIES_ID) ?: "Species not found"
+    private val breedId = savedStateHandle.get<String>(ARG_SPECIES_ID) ?: "Species not found"    // izvucemo iz prosledjenog argumenta, putem navigacije
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -47,13 +47,26 @@ class SpeciesDetailsViewModel @Inject constructor(
 
     // MVI funkcionise tako sto VIEW samo INTENT kad koristik nesto uradi, a VIEWMODEL reaguje na state flow iz modela, BEZ VLASTITOG HARDKODIRANJA inicijalnih dogadjaja
     init {
-        observeEvents()     // mada nam ovo ne treba, jer mi nemamo nikakav EVENT u ovom prostom ekranu
+        observeEvents()
 
-        loadFromDatabase()
+        // ucitacu podatke o rasi macke, za koju sam dobio ID (preko navigacije i savedStateHandle)
+        viewModelScope.launch {
+            breedRepository.observeBreed(breedId)
+                .filterNotNull()
+                .collect { breed ->
+                    _state.update { it.copy(loading=false, breed=breed) }
+                }
+        }
     }
 
+    private fun observeEvents() = viewModelScope.launch{
+        events.collect { event ->
+            // nemam zapravo nikakvu akciju ovde
+        }
+    }
 
-    private fun loadFromDatabase() {
+    /*
+    private fun loadTheDetailsForBreed() {
         viewModelScope.launch {
             breedRepository
                 .observeBreed(breedId)
@@ -67,7 +80,7 @@ class SpeciesDetailsViewModel @Inject constructor(
                         ui.copy(
                             loading = false,
                             error = null,
-                            breed = breed
+                            breed = breed       // GLAVNO: pronalazi breed sa ovim prosledjenim ID, i smesta ga u STANJE.... sada imamo sve neophodno za UI :))
                         )
                     }
                 }
@@ -79,12 +92,5 @@ class SpeciesDetailsViewModel @Inject constructor(
                 // collect{..} traje sve dok ga ne cancel-ujem
         }
     }
-
-    // bitna razlika u kotlinu je FIRST() i COLLECT {} nad jednim hot flow
-
-    private fun observeEvents() = viewModelScope.launch{
-        events.collect {
-            // On this screen - literally nothing to collect
-        }
-    }
+*/
 }

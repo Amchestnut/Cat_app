@@ -33,7 +33,6 @@ class ProfileViewModel @Inject constructor(
 
     init {
         observeEvents()
-
     }
 
     private fun observeEvents() {

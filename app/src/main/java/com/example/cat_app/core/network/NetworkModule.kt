@@ -1,7 +1,6 @@
 package com.example.cat_app.core.network
 
 import com.example.cat_app.features.allspecies.data.remote.AllSpeciesAPI
-import com.example.cat_app.features.leaderboard.data.LeaderboardApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides

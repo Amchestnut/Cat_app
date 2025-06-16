@@ -5,7 +5,7 @@ import com.example.cat_app.core.database.AppDatabase
 import com.example.cat_app.core.datastore.UserPreferencesRepository
 import com.example.cat_app.features.allspecies.domain.Breed
 import com.example.cat_app.features.allspecies.data.mapper.toDomain
-import com.example.cat_app.features.leaderboard.data.LeaderboardApiService
+import com.example.cat_app.features.leaderboard.data.LeaderboardApi
 import com.example.cat_app.features.leaderboard.data.PostResultRequest
 import com.example.cat_app.features.quiz.data.local.QuizResultEntity
 import com.example.cat_app.features.quiz.domain.QUESTIONS_PER_GAME
@@ -20,7 +20,7 @@ import javax.inject.Singleton
 @Singleton
 class QuizRepositoryImpl @Inject constructor(
     private val db: AppDatabase,
-    private val api: LeaderboardApiService,       // retrofit interfejs za POST i GET
+    private val api: LeaderboardApi,       // retrofit interfejs za POST i GET
     private val userPrefs: UserPreferencesRepository,
 ) : QuizRepository {
 
@@ -38,16 +38,20 @@ class QuizRepositoryImpl @Inject constructor(
             .take(QUESTIONS_PER_GAME)
     }
 
-    override fun history(): Flow<List<QuizResultEntity>> = db.quizResultDao().getAllResults()
+    override fun history(): Flow<List<QuizResultEntity>> {
+        return db.quizResultDao().getAllResults()
+    }
 
-    // TODO: najbolji lokalni skor
-    override fun bestScore(): Flow<Double> =
-        db.quizResultDao().getBestResult().map { it?.result ?: 0.0 }
+    override fun bestScore(): Flow<Double> {
+        return db.quizResultDao().getBestResult().map { it?.result ?: 0.0 }
+    }
 
     // najbolja globalna pozicija (ako je bar jedan objavljen)
-    override fun bestRanking(): Flow<Int?> = db.quizResultDao().getBestRanking()
+    override fun bestRanking(): Flow<Int?> {
+        return db.quizResultDao().getBestRanking()
+    }
 
-    // samo lokalno čuvanje (pre nego što se objavi)
+    // samo lokalno cuvanje (pre nego što se objavi)
     override suspend fun saveLocal(result: Double) {
         Log.d("QuizResultRepo", "saveLocal: inserting result=$result")
         db.quizResultDao().insert(
@@ -60,19 +64,43 @@ class QuizRepositoryImpl @Inject constructor(
     }
 
     // objavicu na API i upisacu i u lokalnu bazu sa rankingom!!
+    /**
+     * Zovem ovu funkciju da bi objavio rezultat (double) na globalni leaderboard. To mi je jedini parametar funkcije.
+     * INT return vrednost, jer ova funkcija treba da mi vrati moj NOVI RANKING na globalnoj leaderboard listi.
+     */
     override suspend fun publish(result: Double): Int {
         val nickname = userPrefs.nicknameFlow.first()
-        val resp = api.postResult(PostResultRequest(nickname, result, 1))
-        val ranking = resp.ranking
 
-        db.quizResultDao().insert(
-            QuizResultEntity(
-                result = result,
-                timestamp = System.currentTimeMillis(),
+        // dobicu response koji je tipa "PostResultResponse", tu imam 1)QuizResult i 2)ranking
+        val response = api.postResult(PostResultRequest(nickname, result, 1))
+        val ranking = response.ranking
+
+        // Dohvatim prethodno ubacen lokalni zapis
+        val latest = db.quizResultDao().getLatestResult()
+//        val latest = response.result  // TODO: trebalo bi mozda ovako
+
+        // logggggg
+
+        if (latest != null) {
+            // Napravi kopiju sa published=true i ranking za svaki slucaj
+            val updated = latest.copy(
                 published = true,
                 ranking = ranking
             )
-        )
+            // 4) Azuriram ovaj entitet u bazi (UPDATE)
+            db.quizResultDao().update(updated)
+        } else {
+            // fallback: ako iz nekog razloga nema prethodnog, ubaci novi
+            db.quizResultDao().insert(
+                QuizResultEntity(
+                    result    = result,
+                    timestamp = System.currentTimeMillis(),
+                    published = true,
+                    ranking   = ranking
+                )
+            )
+        }
+
         return ranking
     }
 }

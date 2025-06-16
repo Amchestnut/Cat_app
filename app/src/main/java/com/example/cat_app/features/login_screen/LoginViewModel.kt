@@ -34,35 +34,32 @@ class LoginViewModel @Inject constructor(
 
     fun setEvent(event : UiEvent) = viewModelScope.launch {
         when(event) {
-            is UiEvent.NameChanged ->
-                setState { copy(name = event.name) }
+            is UiEvent.NameChanged -> setState { copy(name = event.name) }
+            is UiEvent.NicknameChanged -> setState { copy(nickname = event.nickname) }
+            is UiEvent.EmailChanged -> setState { copy(email = event.email) }
+            is UiEvent.Submit -> submit()
+        }
+    }
 
-            is UiEvent.NicknameChanged ->
-                setState { copy(nickname = event.nickname) }
 
-            is UiEvent.EmailChanged ->
-                setState { copy(email = event.email) }
-
-            UiEvent.Submit -> {
-                val current = _state.value
-                if (current.name.isBlank() || current.nickname.isBlank() || current.email.isBlank()){
-                    setEffect(SideEffect.ShowError("All fields are required"))
+    private suspend fun submit(){
+        val current = _state.value
+        if (current.name.isBlank() || current.nickname.isBlank() || current.email.isBlank()){
+            setEffect(SideEffect.ShowError("All fields are required"))
+        }
+        else{
+            setState {
+                copy(loading = true, error = null)
+            }
+            try{
+                prefs.saveUserProfile(current.name, current.nickname, current.email)
+                setEffect(SideEffect.NavigateToMain)
+            }
+            catch (t: Throwable){
+                setState {
+                    copy(loading = false, error = t.message)
                 }
-                else{
-                    setState {
-                        copy(loading = true, error = null)
-                    }
-                    try{
-                        prefs.saveUserProfile(current.name, current.nickname, current.email)
-                        setEffect(SideEffect.NavigateToMain)
-                    }
-                    catch (t: Throwable){
-                        setState {
-                            copy(loading = false, error = t.message)
-                        }
-                        setEffect(SideEffect.ShowError(t.message ?: "Unknown error"))
-                    }
-                }
+                setEffect(SideEffect.ShowError(t.message ?: "Unknown error"))
             }
         }
     }

@@ -15,7 +15,6 @@ class ApplicationHilt : Application(){
 
 }
 
-
 /*
 @HiltAndroidApp na mojoj Application klasi generiše koren DI‑grafa (SingletonComponent) i pokreće Hilt‑ovu integraciju s Android lifecycle‑om.
 

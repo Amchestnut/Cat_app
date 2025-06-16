@@ -11,7 +11,7 @@ import com.example.cat_app.core.ui.theme.CatAppTheme
 //import com.example.cat_app.core.ui.theme.Cat_appTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-
+// Hilt generiše za ovu klasu odgovarajući subcomponent (npr. ActivityComponent) i pre poziva onCreate() ubacuje sve @Inject zavisnosti
 @AndroidEntryPoint      // ovo primorava HILT da kreira ActivityComponent i injectuje sve @Inject polja ili zaivnosti u Activity
 class MainActivity : ComponentActivity() {
 

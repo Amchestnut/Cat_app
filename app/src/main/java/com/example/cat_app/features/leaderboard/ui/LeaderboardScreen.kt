@@ -32,7 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +44,7 @@ import com.example.cat_app.core.ui.theme.CatWhite
 import com.example.cat_app.core.ui.theme.ScoreYellow
 import com.example.cat_app.core.ui.theme.SuccessGreen
 import com.example.cat_app.features.leaderboard.ui.LeaderboardContract.LeaderboardItem
+import com.example.cat_app.features.leaderboard.ui.LeaderboardContract.UiEvent
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +54,10 @@ fun LeaderboardScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect (Unit) {
+        viewModel.setEvent(UiEvent.LoadLeaderboard)
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.effect.collect { effect ->

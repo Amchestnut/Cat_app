@@ -1,6 +1,6 @@
 package com.example.cat_app.features.leaderboard.data.network
 
-import com.example.cat_app.features.leaderboard.data.LeaderboardApiService
+import com.example.cat_app.features.leaderboard.data.LeaderboardApi
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import dagger.Module
 import dagger.Provides
@@ -20,16 +20,16 @@ object LeaderboardNetworkModule {
     @Provides
     @Singleton
     fun provideLeaderboardApi(
-        client: OkHttpClient,  // reuses your existing OkHttpClient from NetworkModule
-        json: Json             // reuses your existing Json from NetworkModule
-    ): LeaderboardApiService {
-        // Build a one-off Retrofit, create only the API service, never expose Retrofit itself.
+        client: OkHttpClient,  // iskoristicu ponovo moj OkHttpClient iz NetworkModule
+        json: Json       // iskoristicu ponovo moj JSON iz NetworkModule
+    ): LeaderboardApi {
+        // Pravim retrofit, samo API servis, ne expozujem Retrofit
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
 
         val leaderboardClient = client.newBuilder()
-            // If you *do* need a different interceptor for leaderboard, add it here
+            // Ako bi mi trebao neki drugaciji INTERCEPTOR za leaderboard, dodacu ga ovde:
             .addInterceptor(logging)
             .build()
 
@@ -39,6 +39,6 @@ object LeaderboardNetworkModule {
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
 
-        return retrofit.create(LeaderboardApiService::class.java)
+        return retrofit.create(LeaderboardApi::class.java)
     }
 }

@@ -1,5 +1,6 @@
 package com.example.cat_app.features.allspecies.data.repository
 
+import android.util.Log
 import androidx.room.withTransaction
 import com.example.cat_app.features.allspecies.data.remote.AllSpeciesAPI
 import com.example.cat_app.core.database.AppDatabase
@@ -19,6 +20,7 @@ class BreedRepositoryImpl @Inject constructor(
     private val api : AllSpeciesAPI,
     private val db : AppDatabase,
 ) : BreedRepository {
+    private val TAG = "BreedRepository"
 
     private val dao = db.breedDao()
 
@@ -35,15 +37,22 @@ class BreedRepositoryImpl @Inject constructor(
             .map { it?.toDomain() }    // mapiram dobijeni BREED ENTITY u BREED DOMAIN
 
 
-    // refresh, mozda nekad bude zatrebao
-    override suspend fun refreshAllSpecies() = withContext(Dispatchers.IO) {
-        // 1) fetch sa interneta
-        val remote = api.getAllBreeds().map {
-            it.toEntity()
-        }
-        // 2) upsert u bazu u transakciji
-        db.withTransaction {
+
+    override suspend fun refreshAllSpecies() {
+        Log.d(TAG, "refreshAllSpecies: starting fetch from network…")
+        try {
+            val dtos = api.getAllBreeds()
+            Log.d(TAG, "refreshAllSpecies: API returned ${dtos.size} breeds")
+
+            val remote = api.getAllBreeds().map {
+                it.toEntity()
+            }
             dao.upsertAll(remote)
+            Log.d(TAG, "refreshAllSpecies: DB upsert complete")
+        } catch (e: Exception) {
+            Log.e(TAG, "refreshAllSpecies: error fetching breeds", e)
+            throw e
         }
     }
 }
+

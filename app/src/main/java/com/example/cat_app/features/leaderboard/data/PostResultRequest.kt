@@ -6,5 +6,6 @@ import kotlinx.serialization.Serializable
 data class PostResultRequest(
     val nickname: String,
     val result: Double,
-    val category: Int
+    val category: Int,
+
 )

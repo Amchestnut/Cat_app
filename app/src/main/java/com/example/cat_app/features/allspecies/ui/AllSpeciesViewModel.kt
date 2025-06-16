@@ -27,7 +27,8 @@ class AllSpeciesViewModel @Inject constructor(
     // MutableStateFlow je „hot“ (uvek aktivan) tok podataka koji cuva tacno 1 vrednost.
 
     private val _state = MutableStateFlow(UiState())        // UiState() poziva primarni konstruktor tvoje data class UiState(...) i postavlja podrazumevani pocetni state (npr. loading = true, data = emptyList(), …).
-    val state = _state.asStateFlow()                        // READ-ONLY  (StateFlow<UiState>), da spolja niko ne moze direktno da menja _state.
+    // da sam uradio ovo "val state = _state", onda bi samo stavio da ovaj mutableStateFlow bude javan, i onda svako moze da ga menja
+    val state = _state.asStateFlow()                        // ova metoda samo pravi READ-ONLY interfejs nad MutableStateFlow  (StateFlow<UiState>), da spolja niko ne moze direktno da menja _state.
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)     // azuriranje stanja
 
 
@@ -56,6 +57,7 @@ class AllSpeciesViewModel @Inject constructor(
     }
 
     private fun observeEvents() = viewModelScope.launch {
+        Log.d(TAG, "My context = $coroutineContext")
         Log.d(TAG, "observeEvents: collecting events")
 
         events.collect { event ->
@@ -70,17 +72,15 @@ class AllSpeciesViewModel @Inject constructor(
 
     private fun loadBreeds() = viewModelScope.launch {
         // 1) loading = true
-        setState {
-            copy(loading = true, error = null)
-        }
+        setState { copy(loading = true, error = null) }
 
-        // 2) osvezim bazu sa mreze, ucitam ponovo sa API-ja
+        // 2) osvezim bazu sa mreze, ucitam ponovo sa API-ja, i smestim u ROOM bazu
         runCatching { breedRepository.refreshAllSpecies() }
             .onFailure { t ->
                 setState { copy(loading = false, error = t) }
             }
 
-        // 3) kolektuj iz baze
+        // 3) kolektujem iz baze
         breedRepository.observeAllSpecies()
             .collect { list ->
                 setState {

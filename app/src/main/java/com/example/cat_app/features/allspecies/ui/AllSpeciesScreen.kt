@@ -44,6 +44,11 @@ fun AllSpeciesScreen(
     viewModel: AllSpeciesViewModel = hiltViewModel(),
     onDetailInformationClick: (String) -> Unit,             //  id String
 ) {
+    // 1) Pokreće se jedna korutina čim se aktivira ovaj composable
+    // 2) Ona radi state.collectAsState(), što znači “pretplati se na StateFlow”
+    // 3) Čuva poslednju emitovanu vrednost u Compose‐ovom State<T>.
+    // 4) Svaki put kad se StateFlow emituje nova UiState vrednost, collectAsState ažurira svoj SnapshotState.value …
+    // 5) … i kad god se taj SnapshotState.value promeni, --------Compose automatski pokreće recomposition-------- za sve delove koda koji čitaju uiState (pametannnnn)
     val uiState by viewModel.state.collectAsState()
 
     AllSpeciesScreenContent(

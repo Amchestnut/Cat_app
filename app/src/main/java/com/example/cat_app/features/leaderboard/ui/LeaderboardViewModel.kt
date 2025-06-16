@@ -10,9 +10,6 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class Category(val value: Int) {
-    QUIZ(1)
-}
 
 @HiltViewModel
 class LeaderboardViewModel @Inject constructor(
@@ -36,8 +33,6 @@ class LeaderboardViewModel @Inject constructor(
 
     init {
         observeEvents()
-
-        setEvent(UiEvent.LoadLeaderboard)      // zapravo hocu ovako, prvi put nek bude API pozvan od strane nas, a posle -> refresh ako oces
     }
 
     private fun observeEvents() {
@@ -57,10 +52,12 @@ class LeaderboardViewModel @Inject constructor(
                 copy(loading = true, errorMessage = null)
             }
             try {
-                val raw = repository.getLeaderboard(Category.QUIZ.value)
+                val raw = repository.getLeaderboard(1)      // u API documentation je receno da treba da saljem broj 1
 
                 // calculate plays per nickname
-                val playsMap = raw.groupingBy { it.nickname }.eachCount()
+                val playsMap = raw.groupingBy {
+                    it.nickname
+                }.eachCount()
 
                 // build UI items
                 val items = raw.mapIndexed { idx, dto ->
@@ -72,6 +69,7 @@ class LeaderboardViewModel @Inject constructor(
                     )
                 }
 
+                // setovacu sve iteme koje sam ucitao, da bi ih prikazao na UI
                 setState {
                     copy(loading = false, items = items)
                 }
